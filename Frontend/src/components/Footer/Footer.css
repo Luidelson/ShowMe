@@ -1,0 +1,13 @@
+.footer {
+  background-color: blue;
+}
+
+.footer-content {
+  color: white;
+  background-color: gray;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 119px;
+}
