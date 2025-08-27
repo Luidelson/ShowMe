@@ -1,5 +1,10 @@
-.footer {
+.Footer {
   background-color: blue;
+  width: 100vw;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
 }
 
 .footer-content {

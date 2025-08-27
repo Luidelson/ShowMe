@@ -101,40 +101,16 @@ function Profile({ user, onLogout }) {
   };
 
   return (
-    <div
-      className="profile-wrapper"
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        minHeight: '100vh',
-      }}
-    >
-      <aside
-        className="profile-sidebar"
-        style={{ width: 240, minWidth: 180, maxWidth: 280, flexShrink: 0 }}
-      >
+    <div className="profile-wrapper">
+      <aside className="profile-sidebar">
         <div className="profile-header-row">
           {displayAvatar && (
-            <img
-              src={displayAvatar}
-              alt="Profile"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                marginRight: 12,
-              }}
-            />
+            <img src={displayAvatar} alt="Profile" className="profile-avatar" />
           )}
           <div className="profile-name">{displayName || 'Profile Name'}</div>
         </div>
         {/* Edit Profile button above Sign Out button */}
-        <button
-          className="profile-edit-btn"
-          onClick={() => setShowEdit(true)}
-          style={{ marginBottom: 16 }}
-        >
+        <button className="profile-edit-btn" onClick={() => setShowEdit(true)}>
           Edit Profile
         </button>
         <br></br>
@@ -145,10 +121,7 @@ function Profile({ user, onLogout }) {
         {showEdit && (
           <div className="profile-edit-overlay">
             <div className="profile-edit-modal">
-              <form
-                onSubmit={handleEditSubmit}
-                style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-              >
+              <form onSubmit={handleEditSubmit} className="profile-edit-form">
                 <label htmlFor="edit-username">Profile Name</label>
                 <input
                   id="edit-username"
@@ -180,17 +153,8 @@ function Profile({ user, onLogout }) {
           </div>
         )}
       </aside>
-      <main
-        className="profile-main"
-        style={{
-          flex: 1,
-          padding: '32px 40px 32px 32px',
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <h2 style={{ marginBottom: 24 }}>My Shows</h2>
+      <main className="profile-main">
+        <h2 className="profile-myshows-heading">My Shows</h2>
         <div className="shows-grid">
           {myShows.length === 0 && <div>No shows added yet.</div>}
           {myShows.map((show) => {
@@ -208,11 +172,6 @@ function Profile({ user, onLogout }) {
               <div
                 className="show-card"
                 key={show.id}
-                style={{
-                  marginBottom: 18,
-                  position: 'relative',
-                  cursor: 'pointer',
-                }}
                 onClick={() => {
                   setEditShowModal(show);
                   setEditSeason(progress.season);
@@ -222,17 +181,8 @@ function Profile({ user, onLogout }) {
                 <img
                   src={imageSrc}
                   alt={show.name}
-                  className="show-image-placeholder"
+                  className="show-image-placeholder profile-show-image"
                   loading="lazy"
-                  style={{
-                    width: '180px',
-                    height: '180px',
-                    objectFit: 'contain',
-                    borderRadius: '12px',
-                    background: '#eee',
-                    display: 'block',
-                    margin: '0 auto',
-                  }}
                 />
                 <div className="show-info">
                   <div>{show.name}</div>
@@ -247,39 +197,17 @@ function Profile({ user, onLogout }) {
       </main>
       {/* Show Edit Modal */}
       {editShowModal && (
-        <div className="profile-edit-overlay" style={{ zIndex: 1000 }}>
-          <div
-            className="profile-edit-modal"
-            style={{ minWidth: 320, position: 'relative' }}
-          >
+        <div className="profile-edit-overlay">
+          <div className="profile-edit-modal">
             {editShowModal.image_thumbnail_path && (
               <img
                 src={editShowModal.image_thumbnail_path}
                 alt={editShowModal.name}
-                style={{
-                  width: '100%',
-                  height: '180px',
-                  objectFit: 'contain',
-                  borderRadius: '12px',
-                  marginBottom: '16px',
-                  background: '#eee',
-                  display: 'block',
-                  overflow: 'hidden',
-                }}
+                className="profile-edit-image"
               />
             )}
             <button
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 16,
-                fontSize: 32,
-                background: 'none',
-                border: 'none',
-                color: '#888',
-                cursor: 'pointer',
-                zIndex: 10,
-              }}
+              className="profile-edit-close"
               aria-label="Close"
               onClick={() => setEditShowModal(null)}
             >
@@ -352,7 +280,5 @@ function Profile({ user, onLogout }) {
     </div>
   );
 }
-
-//
 
 export default Profile;

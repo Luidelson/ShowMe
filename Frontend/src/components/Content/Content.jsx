@@ -85,7 +85,6 @@ function Content() {
 
   return (
     <div className="content-wrapper">
-  {/* Sidebar removed from mobile view */}
       <div>
         <div className="search-genre-row">
           <input
@@ -99,14 +98,6 @@ function Content() {
             value={selectedGenre}
             onChange={(e) => setSelectedGenre(e.target.value)}
             className="genre-dropdown"
-            style={{
-              padding: '8px 16px',
-              borderRadius: 6,
-              border: '1px solid #4fc3f7',
-              fontWeight: 500,
-              minWidth: 160,
-              marginRight: 8,
-            }}
           >
             <option value="">All Genres</option>
             {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
@@ -122,16 +113,7 @@ function Content() {
         {selectedGenre && (
           <button
             onClick={() => setSelectedGenre('')}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 6,
-              border: '1px solid #aaa',
-              background: '#eee',
-              color: '#333',
-              cursor: 'pointer',
-              fontWeight: 500,
-              marginTop: 8,
-            }}
+            className="genre-clear-btn"
           >
             Clear
           </button>
@@ -150,7 +132,6 @@ function Content() {
               className="show-card"
               key={show.id}
               onClick={() => setModalShow(show)}
-              style={{ cursor: 'pointer' }}
             >
               <img
                 src={
@@ -160,13 +141,6 @@ function Content() {
                 }
                 alt={show.name}
                 className="show-image-placeholder"
-                style={{
-                  width: '120px',
-                  height: '100px',
-                  objectFit: 'cover',
-                  borderRadius: '6px',
-                  background: '#eee',
-                }}
               />
               <div className="show-info">
                 <div>{show.name}</div>
@@ -181,42 +155,21 @@ function Content() {
             </div>
           ))}
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          margin: '0px 0',
-          gap: 8,
-          paddingBottom: 8,
-        }}
-      >
+      <div className="pagination-row">
         <button
           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 6,
-            border: '1px solid #ccc',
-            background: '#fff',
-            cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-          }}
+          className="pagination-btn prev-btn"
         >
           Previous
         </button>
-        <span style={{ fontWeight: 500, margin: '0 12px' }}>
+        <span className="pagination-info">
           Page {currentPage} of {totalPages || '...'}
         </span>
         <button
           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 6,
-            border: '1px solid #ccc',
-            background: '#fff',
-            cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-          }}
+          className="pagination-btn next-btn"
         >
           Next
         </button>
@@ -252,13 +205,7 @@ function Content() {
                   : 'https://static.tvmaze.com/images/no-img/no-img-portrait-text.png'
               }
               alt={modalShow.name}
-              className="show-image-placeholder"
-              style={{
-                width: 180,
-                height: 150,
-                borderRadius: 8,
-                marginBottom: 16,
-              }}
+              className="show-image-placeholder modal-image"
             />
             <h2>{modalShow.name}</h2>
             <p>
