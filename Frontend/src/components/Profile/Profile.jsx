@@ -103,7 +103,12 @@ function Profile({ user, onLogout }) {
   return (
     <div
       className="profile-wrapper"
-      style={{ display: 'flex', width: '100%', minHeight: '100vh' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        minHeight: '100vh',
+      }}
     >
       <aside
         className="profile-sidebar"

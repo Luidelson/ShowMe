@@ -85,37 +85,40 @@ function Content() {
 
   return (
     <div className="content-wrapper">
-      {/* Removed anime count display */}
-      <input
-        type="text"
-        placeholder="Search shows..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="search-bar"
-      />
-      {/* Genre dropdown menu */}
-      <div style={{ margin: '12px 0' }}>
-        <select
-          value={selectedGenre}
-          onChange={(e) => setSelectedGenre(e.target.value)}
-          style={{
-            padding: '8px 16px',
-            borderRadius: 6,
-            border: '1px solid #4fc3f7',
-            fontWeight: 500,
-            minWidth: 160,
-            marginRight: 8,
-          }}
-        >
-          <option value="">All Genres</option>
-          {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
-            (genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
-            )
-          )}
-        </select>
+  {/* Sidebar removed from mobile view */}
+      <div>
+        <div className="search-genre-row">
+          <input
+            type="text"
+            placeholder="Search shows..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="search-bar"
+          />
+          <select
+            value={selectedGenre}
+            onChange={(e) => setSelectedGenre(e.target.value)}
+            className="genre-dropdown"
+            style={{
+              padding: '8px 16px',
+              borderRadius: 6,
+              border: '1px solid #4fc3f7',
+              fontWeight: 500,
+              minWidth: 160,
+              marginRight: 8,
+            }}
+          >
+            <option value="">All Genres</option>
+            {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
+              (genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              )
+            )}
+          </select>
+        </div>
+        {/* Genre clear button */}
         {selectedGenre && (
           <button
             onClick={() => setSelectedGenre('')}
@@ -127,6 +130,7 @@ function Content() {
               color: '#333',
               cursor: 'pointer',
               fontWeight: 500,
+              marginTop: 8,
             }}
           >
             Clear
