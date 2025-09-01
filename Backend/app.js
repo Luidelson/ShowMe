@@ -1,9 +1,9 @@
 // ...existing code...
+const express = require("express");
 // Default route for root
 app.get("/", (req, res) => {
   res.send("Welcome to ShowMe backend!");
 });
-const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
