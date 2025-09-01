@@ -1,18 +1,13 @@
-
 const express = require("express");
+require("dotenv").config();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const User = require("./models/user");
 const showsApi = require("./routes/showsApi");
 const app = express();
-app.use(cors({ origin: "http://localhost:3001", credentials: true }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
-
-// Default route for root
-app.get("/", (req, res) => {
-  res.send("Welcome to ShowMe backend!");
-});
 
 mongoose.connect("mongodb://localhost:27017/finalproject");
 

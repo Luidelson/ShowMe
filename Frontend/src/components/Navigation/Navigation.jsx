@@ -1,7 +1,7 @@
-import "./Navigation.css";
-import { Link } from "react-router-dom";
+import './Navigation.css';
+import { Link } from 'react-router-dom';
 
-function Navigation() {
+function Navigation({ user }) {
   return (
     <nav className="navbar">
       <Link to="/" className="nav-logo">
@@ -11,7 +11,7 @@ function Navigation() {
         {/* <button className="nav_add-show-btn">+ Add Show</button> */}
         <Link to="/shows">Shows</Link>
         <Link to="/about">About</Link>
-        <Link to="/profile">Profile</Link>
+        {user && <Link to="/profile">Profile</Link>}
       </div>
     </nav>
   );
