@@ -110,4 +110,14 @@ app.put("/api/profile", async (req, res) => {
 app.use("/api", showsApi);
 
 const PORT = process.env.PORT || 3000;
+// GET /items returns an empty array
+app.get("/items", (req, res) => {
+  res.json([]);
+});
+
+// POST /items returns an authorization error
+app.post("/items", (req, res) => {
+  res.status(401).json({ error: "Authorization required" });
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
