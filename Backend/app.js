@@ -1,9 +1,5 @@
-// ...existing code...
+
 const express = require("express");
-// Default route for root
-app.get("/", (req, res) => {
-  res.send("Welcome to ShowMe backend!");
-});
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
@@ -12,6 +8,11 @@ const showsApi = require("./routes/showsApi");
 const app = express();
 app.use(cors({ origin: "http://localhost:3001", credentials: true }));
 app.use(express.json());
+
+// Default route for root
+app.get("/", (req, res) => {
+  res.send("Welcome to ShowMe backend!");
+});
 
 mongoose.connect("mongodb://localhost:27017/finalproject");
 
