@@ -109,7 +109,7 @@ app.put("/api/profile", async (req, res) => {
 
 app.use("/api", showsApi);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 // GET /items returns an empty array
 app.get("/items", (req, res) => {
   res.json([]);
