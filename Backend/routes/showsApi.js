@@ -54,4 +54,15 @@ router.get("/max-pages", async (req, res) => {
   res.json({ maxPages: 7000 });
 });
 
+const showsController = require("../controllers/shows");
+
+// Save a show for the logged-in user
+router.post("/save-show", showsController.saveShow);
+
+// Get all saved shows for the logged-in user
+router.get("/saved-shows", showsController.getSavedShows);
+
+// Delete a saved show for the logged-in user
+router.delete("/delete-show", showsController.deleteShow);
+
 module.exports = router;

@@ -20,24 +20,24 @@ function Profile({ user, onLogout }) {
   };
   const [myShows, setMyShows] = useState([]);
 
-  // Load added shows from localStorage on mount
+  // Fetch saved shows from backend on mount
   React.useEffect(() => {
-    const storedShows = localStorage.getItem('myShows');
-    if (storedShows) {
-      setMyShows(JSON.parse(storedShows));
-    }
-  }, []);
-
-  // Listen for changes to localStorage (from Content.jsx)
-  React.useEffect(() => {
-    const onStorage = () => {
-      const storedShows = localStorage.getItem('myShows');
-      if (storedShows) {
-        setMyShows(JSON.parse(storedShows));
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMyShows(data.shows || []);
+      })
+      .catch(() => {
+        setMyShows([]);
+      });
   }, []);
   const [showEdit, setShowEdit] = useState(false);
   const [username, setUsername] = useState('');
@@ -158,7 +158,6 @@ function Profile({ user, onLogout }) {
         <div className="shows-grid">
           {myShows.length === 0 && <div>No shows added yet.</div>}
           {myShows.map((show) => {
-            const progress = getShowProgress(show.id);
             // Use TVmaze image if available, fallback to placeholder
             const imageSrc =
               show.image && show.image.medium
@@ -171,11 +170,11 @@ function Profile({ user, onLogout }) {
             return (
               <div
                 className="show-card"
-                key={show.id}
+                key={show.showId}
                 onClick={() => {
                   setEditShowModal(show);
-                  setEditSeason(progress.season);
-                  setEditEpisode(progress.episode);
+                  setEditSeason(show.season || '');
+                  setEditEpisode(show.episode || '');
                 }}
               >
                 <img
@@ -187,8 +186,8 @@ function Profile({ user, onLogout }) {
                 <div className="show-info">
                   <div>{show.name}</div>
                   <div>Start: {show.start_date}</div>
-                  <div>Season: {progress.season || '-'}</div>
-                  <div>Episode: {progress.episode || '-'}</div>
+                  <div>Season: {show.season || '-'}</div>
+                  <div>Episode: {show.episode || '-'}</div>
                 </div>
               </div>
             );
@@ -218,9 +217,36 @@ function Profile({ user, onLogout }) {
               <b>{editShowModal.name}</b>
             </div>
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
-                saveShowProgress(editShowModal.id, editSeason, editEpisode);
+                const token = localStorage.getItem('token');
+                await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    showId: editShowModal.showId,
+                    name: editShowModal.name,
+                    image: editShowModal.image,
+                    start_date: editShowModal.start_date,
+                    season: editSeason,
+                    episode: editEpisode,
+                    genres: editShowModal.genres,
+                    rating: editShowModal.rating,
+                  }),
+                });
+                // Refresh saved shows
+                const res = await fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                });
+                const data = await res.json();
+                setMyShows(data.shows || []);
                 setEditShowModal(null);
               }}
               style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
@@ -249,25 +275,26 @@ function Profile({ user, onLogout }) {
               <button
                 type="button"
                 className="profile-cancel-btn"
-                onClick={() => {
-                  // Remove show from localStorage
-                  const myShows = JSON.parse(
-                    localStorage.getItem('myShows') || '[]'
-                  );
-                  const updatedShows = myShows.filter(
-                    (s) => s.id !== editShowModal.id
-                  );
-                  localStorage.setItem('myShows', JSON.stringify(updatedShows));
-                  setMyShows(updatedShows);
-                  // Remove progress for this show
-                  const progress = JSON.parse(
-                    localStorage.getItem('showProgress') || '{}'
-                  );
-                  delete progress[editShowModal.id];
-                  localStorage.setItem(
-                    'showProgress',
-                    JSON.stringify(progress)
-                  );
+                onClick={async () => {
+                  const token = localStorage.getItem('token');
+                  await fetch('https://api.showme.jumpingcrab.com/api/delete-show', {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ showId: editShowModal.showId }),
+                  });
+                  // Refresh saved shows
+                  const res = await fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
+                    method: 'GET',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                  });
+                  const data = await res.json();
+                  setMyShows(data.shows || []);
                   setEditShowModal(null);
                 }}
               >

@@ -35,18 +35,26 @@ function Content() {
     );
   };
 
-  // Placeholder for add show logic
-  const handleAddShow = (show) => {
-    // Save to localStorage for demo purposes
-    const myShows = JSON.parse(localStorage.getItem('myShows') || '[]');
-    if (!myShows.find((s) => s.id === show.id)) {
-      myShows.push(show);
-      localStorage.setItem('myShows', JSON.stringify(myShows));
-      window.dispatchEvent(new Event('storage'));
-      // No alert
-    } else {
-      // No alert
-    }
+  // Save show to backend for logged-in user
+  const handleAddShow = async (show) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        showId: show.id,
+        name: show.name,
+        image: show.image,
+        start_date: show.premiered,
+        genres: show.genres,
+        rating: show.rating,
+      }),
+    });
+    // Optionally, you can show a message or refresh saved shows in Profile
   };
 
   // Fetch max page count on mount
