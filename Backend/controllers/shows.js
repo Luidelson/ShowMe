@@ -1,6 +1,5 @@
 const Show = require("../models/show");
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "changeme";
 
 // Save a show for the logged-in user
 exports.saveShow = async (req, res) => {
@@ -10,12 +9,23 @@ exports.saveShow = async (req, res) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded.userId || decoded.id;
-    const { showId, name, image, start_date, season, episode, genres, rating } = req.body;
+    const { showId, name, image, start_date, season, episode, genres, rating } =
+      req.body;
     if (!showId) return res.status(400).json({ error: "Missing showId." });
     // Prevent duplicate
     const existing = await Show.findOne({ userId, showId });
     if (existing) return res.status(409).json({ error: "Show already saved." });
-    const show = new Show({ userId, showId, name, image, start_date, season, episode, genres, rating });
+    const show = new Show({
+      userId,
+      showId,
+      name,
+      image,
+      start_date,
+      season,
+      episode,
+      genres,
+      rating,
+    });
     await show.save();
     res.status(201).json({ message: "Show saved.", show });
   } catch (err) {

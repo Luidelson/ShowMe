@@ -1,5 +1,5 @@
 const express = require("express");
-const JWT_SECRET = process.env.JWT_SECRET || "changeme";
+
 require("dotenv").config();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
