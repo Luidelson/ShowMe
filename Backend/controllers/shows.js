@@ -10,25 +10,25 @@ exports.saveShow = async (req, res) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded.userId || decoded.id;
-    const { showId, name, image, start_date, season, episode, genres, rating } =
-      req.body;
+    const { showId, name, image, start_date, season, episode, genres, rating } = req.body;
     if (!showId) return res.status(400).json({ error: "Missing showId." });
-    // Prevent duplicate
-    const existing = await Show.findOne({ userId, showId });
-    if (existing) return res.status(409).json({ error: "Show already saved." });
-    const show = new Show({
-      userId,
-      showId,
-      name,
-      image,
-      start_date,
-      season,
-      episode,
-      genres,
-      rating,
-    });
-    await show.save();
-    res.status(201).json({ message: "Show saved.", show });
+    // Upsert: update if exists, create if not
+    const show = await Show.findOneAndUpdate(
+      { userId, showId },
+      {
+        $set: {
+          name,
+          image,
+          start_date,
+          season,
+          episode,
+          genres,
+          rating,
+        },
+      },
+      { new: true, upsert: true }
+    );
+    res.status(200).json({ message: "Show saved/updated.", show });
   } catch (err) {
     res.status(401).json({ error: "Invalid token." });
   }
