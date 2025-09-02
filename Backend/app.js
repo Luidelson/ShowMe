@@ -1,6 +1,6 @@
 const express = require("express");
-
 require("dotenv").config();
+const { JWT_SECRET } = require("./utils/config");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
