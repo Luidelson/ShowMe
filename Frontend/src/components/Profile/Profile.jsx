@@ -6,18 +6,7 @@ function Profile({ user, onLogout }) {
   const [editSeason, setEditSeason] = useState('');
   const [editEpisode, setEditEpisode] = useState('');
 
-  // Load season/episode info from localStorage for a show
-  const getShowProgress = (showId) => {
-    const progress = JSON.parse(localStorage.getItem('showProgress') || '{}');
-    return progress[showId] || { season: '', episode: '' };
-  };
-
-  // Save season/episode info to localStorage for a show
-  const saveShowProgress = (showId, season, episode) => {
-    const progress = JSON.parse(localStorage.getItem('showProgress') || '{}');
-    progress[showId] = { season, episode };
-    localStorage.setItem('showProgress', JSON.stringify(progress));
-  };
+  // Show progress is now stored in backend per user, so no localStorage usage.
   const [myShows, setMyShows] = useState([]);
 
   // Fetch saved shows from backend on mount
@@ -50,13 +39,16 @@ function Profile({ user, onLogout }) {
       const token = localStorage.getItem('token');
       if (!token) return;
       try {
-  const response = await fetch('https://api.showme.jumpingcrab.com/api/profile', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          'https://api.showme.jumpingcrab.com/api/profile',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.json();
         if (response.ok) {
           setDisplayName(data.username || '');
@@ -75,14 +67,17 @@ function Profile({ user, onLogout }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-  const response = await fetch('https://api.showme.jumpingcrab.com/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ username, avatarUrl }),
-      });
+      const response = await fetch(
+        'https://api.showme.jumpingcrab.com/api/profile',
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ username, avatarUrl }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         setDisplayName(data.user.username);
@@ -220,31 +215,37 @@ function Profile({ user, onLogout }) {
               onSubmit={async (e) => {
                 e.preventDefault();
                 const token = localStorage.getItem('token');
-                await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    showId: editShowModal.showId,
-                    name: editShowModal.name,
-                    image: editShowModal.image,
-                    start_date: editShowModal.start_date,
-                    season: editSeason,
-                    episode: editEpisode,
-                    genres: editShowModal.genres,
-                    rating: editShowModal.rating,
-                  }),
-                });
+                await fetch(
+                  'https://api.showme.jumpingcrab.com/api/save-show',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      showId: editShowModal.showId,
+                      name: editShowModal.name,
+                      image: editShowModal.image,
+                      start_date: editShowModal.start_date,
+                      season: editSeason,
+                      episode: editEpisode,
+                      genres: editShowModal.genres,
+                      rating: editShowModal.rating,
+                    }),
+                  }
+                );
                 // Refresh saved shows
-                const res = await fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
-                  method: 'GET',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
+                const res = await fetch(
+                  'https://api.showme.jumpingcrab.com/api/saved-shows',
+                  {
+                    method: 'GET',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
                 const data = await res.json();
                 setMyShows(data.shows || []);
                 setEditShowModal(null);
@@ -277,22 +278,28 @@ function Profile({ user, onLogout }) {
                 className="profile-cancel-btn"
                 onClick={async () => {
                   const token = localStorage.getItem('token');
-                  await fetch('https://api.showme.jumpingcrab.com/api/delete-show', {
-                    method: 'DELETE',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ showId: editShowModal.showId }),
-                  });
+                  await fetch(
+                    'https://api.showme.jumpingcrab.com/api/delete-show',
+                    {
+                      method: 'DELETE',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ showId: editShowModal.showId }),
+                    }
+                  );
                   // Refresh saved shows
-                  const res = await fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
-                    method: 'GET',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token}`,
-                    },
-                  });
+                  const res = await fetch(
+                    'https://api.showme.jumpingcrab.com/api/saved-shows',
+                    {
+                      method: 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
                   const data = await res.json();
                   setMyShows(data.shows || []);
                   setEditShowModal(null);
