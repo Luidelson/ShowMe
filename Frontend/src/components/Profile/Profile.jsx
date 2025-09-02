@@ -12,7 +12,6 @@ function Profile({ user, onLogout }) {
   // Fetch saved shows from backend on mount
   React.useEffect(() => {
     const token = localStorage.getItem('token');
-    console.log('Saved-shows token:', token);
     if (!token) return;
     fetch('https://api.showme.jumpingcrab.com/api/saved-shows', {
       method: 'GET',
@@ -21,12 +20,8 @@ function Profile({ user, onLogout }) {
         Authorization: `Bearer ${token}`,
       },
     })
-      .then(async (res) => {
-        console.log('Saved-shows response status:', res.status);
-        const data = await res.json();
-        if (res.status === 401) {
-          alert('Session expired or unauthorized. Please log in again.');
-        }
+      .then((res) => res.json())
+      .then((data) => {
         setMyShows(data.shows || []);
       })
       .catch(() => {

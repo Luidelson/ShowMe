@@ -1,5 +1,6 @@
 const Show = require("../models/show");
 const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 // Save a show for the logged-in user
 exports.saveShow = async (req, res) => {

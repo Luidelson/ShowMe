@@ -38,12 +38,8 @@ function Content() {
   // Save show to backend for logged-in user
   const handleAddShow = async (show) => {
     const token = localStorage.getItem('token');
-    console.log('Save-show token:', token);
-    if (!token) {
-      alert('You must be logged in to save shows.');
-      return;
-    }
-    const response = await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
+    if (!token) return;
+    await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,10 +54,6 @@ function Content() {
         rating: show.rating,
       }),
     });
-    if (response.status === 401) {
-      alert('Session expired or unauthorized. Please log in again.');
-      return;
-    }
     // Optionally, you can show a message or refresh saved shows in Profile
   };
 
