@@ -215,40 +215,52 @@ function Profile({ user, onLogout }) {
               onSubmit={async (e) => {
                 e.preventDefault();
                 const token = localStorage.getItem('token');
-                await fetch(
-                  'https://api.showme.jumpingcrab.com/api/save-show',
-                  {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                      showId: editShowModal.showId,
-                      name: editShowModal.name,
-                      image: editShowModal.image,
-                      start_date: editShowModal.start_date,
-                      season: editSeason,
-                      episode: editEpisode,
-                      genres: editShowModal.genres,
-                      rating: editShowModal.rating,
-                    }),
+                try {
+                  const response = await fetch(
+                    'https://api.showme.jumpingcrab.com/api/save-show',
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({
+                        showId: editShowModal.showId,
+                        name: editShowModal.name,
+                        image: editShowModal.image,
+                        start_date: editShowModal.start_date,
+                        season: editSeason,
+                        episode: editEpisode,
+                        genres: editShowModal.genres,
+                        rating: editShowModal.rating,
+                      }),
+                    }
+                  );
+                  const result = await response.json();
+                  if (!response.ok) {
+                    alert(
+                      result.error ||
+                        `Failed to save show (status ${response.status})`
+                    );
+                    return;
                   }
-                );
-                // Refresh saved shows
-                const res = await fetch(
-                  'https://api.showme.jumpingcrab.com/api/saved-shows',
-                  {
-                    method: 'GET',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${token}`,
-                    },
-                  }
-                );
-                const data = await res.json();
-                setMyShows(data.shows || []);
-                setEditShowModal(null);
+                  // Refresh saved shows only if save succeeded
+                  const res = await fetch(
+                    'https://api.showme.jumpingcrab.com/api/saved-shows',
+                    {
+                      method: 'GET',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
+                  const data = await res.json();
+                  setMyShows(data.shows || []);
+                  setEditShowModal(null);
+                } catch (err) {
+                  alert('Network error while saving show');
+                }
               }}
               style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
             >
