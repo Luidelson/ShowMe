@@ -24,8 +24,6 @@ mongoose.connection.on("error", (err) => {
   console.error("MongoDB connection error:", err);
 });
 
-const JWT_SECRET = "your_jwt_secret"; // Change this in production
-
 // Registration (auto-login)
 app.post("/api/register", async (req, res) => {
   const { email, password } = req.body;

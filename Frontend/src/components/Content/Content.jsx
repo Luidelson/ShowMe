@@ -51,7 +51,7 @@ function Content() {
 
   // Fetch max page count on mount
   useEffect(() => {
-  fetch('http://localhost:3001/api/max-pages')
+  fetch('https://api.showme.jumpingcrab.com/api/max-pages')
       .then((res) => res.json())
       .then((data) => {
         setTotalPages(data.maxPages);
@@ -63,7 +63,7 @@ function Content() {
 
   useEffect(() => {
     setLoading(true);
-  fetch(`http://localhost:3001/api/all-shows?page=${currentPage}`)
+  fetch(`https://api.showme.jumpingcrab.com/api/all-shows?page=${currentPage}`)
       .then((res) => res.json())
       .then((data) => {
         setShows(data.shows || []);

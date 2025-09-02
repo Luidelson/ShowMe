@@ -50,7 +50,7 @@ function Profile({ user, onLogout }) {
       const token = localStorage.getItem('token');
       if (!token) return;
       try {
-        const response = await fetch('http://localhost:3001/api/profile', {
+  const response = await fetch('https://api.showme.jumpingcrab.com/api/profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ function Profile({ user, onLogout }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('http://localhost:3001/api/profile', {
+  const response = await fetch('https://api.showme.jumpingcrab.com/api/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
