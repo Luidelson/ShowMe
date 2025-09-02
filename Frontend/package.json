@@ -3,11 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://www.showme.jumpingcrab.com",
   "scripts": {
     "dev": "vite --open",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "npm run build && scp -r ./dist/* lutrunks11@www.showme.jumpingcrab.com:/home/lutrunks11@/Frontend"
   },
   "dependencies": {
     "react": "^18.3.1",
