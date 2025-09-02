@@ -38,11 +38,8 @@ function Content() {
   // Save show to backend for logged-in user
   const handleAddShow = async (show) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      alert('You must be logged in to save shows.');
-      return;
-    }
-    const response = await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
+    if (!token) return;
+    await fetch('https://api.showme.jumpingcrab.com/api/save-show', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -57,16 +54,12 @@ function Content() {
         rating: show.rating,
       }),
     });
-    if (response.status === 401) {
-      alert('Session expired or unauthorized. Please log in again.');
-      return;
-    }
     // Optionally, you can show a message or refresh saved shows in Profile
   };
 
   // Fetch max page count on mount
   useEffect(() => {
-  fetch('https://api.showme.jumpingcrab.com/api/max-pages')
+    fetch('https://api.showme.jumpingcrab.com/api/max-pages')
       .then((res) => res.json())
       .then((data) => {
         setTotalPages(data.maxPages);
@@ -78,7 +71,9 @@ function Content() {
 
   useEffect(() => {
     setLoading(true);
-  fetch(`https://api.showme.jumpingcrab.com/api/all-shows?page=${currentPage}`)
+    fetch(
+      `https://api.showme.jumpingcrab.com/api/all-shows?page=${currentPage}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setShows(data.shows || []);
@@ -115,13 +110,13 @@ function Content() {
             className="genre-dropdown"
           >
             <option value="">All Genres</option>
-            {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
-              (genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              )
-            )}
+            {Array.from(
+              new Set(shows.flatMap((show) => show.genres || []))
+            ).map((genre) => (
+              <option key={genre} value={genre}>
+                {genre}
+              </option>
+            ))}
           </select>
         </div>
         {/* Genre clear button */}
