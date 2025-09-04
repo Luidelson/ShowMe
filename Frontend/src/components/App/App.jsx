@@ -41,7 +41,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="app">
       <Navigation />
       <Routes>
         <Route
@@ -52,26 +52,35 @@ function App() {
                 <Profile user={user} onLogout={handleLogout} />
               </ProtectedRoute>
             ) : (
-              <div className="main-content">
-                <div className="circle-container">
-                  <div className="features-circle">
+              <div className="app__main" role="main">
+                <section
+                  className="app__circle-container"
+                  aria-labelledby="features-heading"
+                >
+                  <div className="app__features-circle">
+                    <h1 id="features-heading" className="visually-hidden">
+                      ShowMe Features
+                    </h1>
                     <ul>
                       <li>
-                        <span className="check">&#10003;</span> Keep up with
-                        your favorite shows
+                        <span className="app__check">&#10003;</span> Keep up
+                        with your favorite shows
                       </li>
                       <li>
-                        <span className="check">&#10003;</span> Find new shows
-                        to watch
+                        <span className="app__check">&#10003;</span> Find new
+                        shows to watch
                       </li>
                       <li>
-                        <span className="check">&#10003;</span> Get started free
-                        today!
+                        <span className="app__check">&#10003;</span> Get started
+                        free today!
                       </li>
                     </ul>
                   </div>
-                </div>
-                <div className="register-form">
+                </section>
+                <div
+                  className="app__register-form"
+                  aria-labelledby="auth-heading"
+                >
                   {!showRegister ? (
                     <LoginModal onLogin={handleLogin} />
                   ) : (
@@ -79,7 +88,7 @@ function App() {
                   )}
                   <button
                     type="button"
-                    className="register-btn"
+                    className="app__register-btn"
                     onClick={() => setShowRegister(!showRegister)}
                   >
                     {showRegister ? 'Back to Login' : 'Register'}

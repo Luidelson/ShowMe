@@ -1,4 +1,4 @@
-.Footer {
+.footer {
   background-color: blue;
   width: 100vw;
   position: sticky;
@@ -7,7 +7,7 @@
   z-index: 100;
 }
 
-.footer-content {
+.footer__content {
   color: white;
   background-color: gray;
   text-decoration: none;
@@ -16,3 +16,5 @@
   justify-content: center;
   height: 119px;
 }
+
+.footer__copyright { font-size: 0.9rem; }

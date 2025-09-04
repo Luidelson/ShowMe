@@ -18,11 +18,14 @@ function RegisterModal({ onRegister }) {
       return;
     }
     try {
-  const response = await fetch('https://api.showme.jumpingcrab.com/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, confirmPassword }),
-      });
+      const response = await fetch(
+        'https://api.showme.jumpingcrab.com/api/register',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, confirmPassword }),
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         if (onRegister) onRegister(data);
@@ -36,15 +39,16 @@ function RegisterModal({ onRegister }) {
   };
 
   return (
-    <div className="RegisterModal">
-      <form onSubmit={handleSubmit}>
-        <h2>Register</h2>
+    <div className="register-modal">
+      <form onSubmit={handleSubmit} className="register-modal__form">
+        <h2 className="register-modal__title">Register</h2>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="register-modal__input"
         />
         <input
           type="password"
@@ -52,6 +56,7 @@ function RegisterModal({ onRegister }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="register-modal__input"
         />
         <input
           type="password"
@@ -59,11 +64,16 @@ function RegisterModal({ onRegister }) {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          className="register-modal__input"
         />
-        <button type="submit" disabled={loading}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="register-modal__submit"
+        >
           {loading ? 'Registering...' : 'Register'}
         </button>
-        {error && <div className="error">{error}</div>}
+        {error && <div className="register-modal__error">{error}</div>}
       </form>
     </div>
   );

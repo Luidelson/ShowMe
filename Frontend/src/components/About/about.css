@@ -1,6 +1,7 @@
-.about-container {
+.about {
   min-height: 100vh;
   background: lightgray;
+  display: block;
 }
 
 .about-header {
@@ -12,7 +13,7 @@
 }
 
 .about-logo {
-  font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 1.2rem;
   color: #d77f7b;
   letter-spacing: 1px;
@@ -27,12 +28,18 @@
   color: #222;
 }
 
-.about-main {
+.about__main {
   max-width: 700px;
-  margin: 0 auto 0 auto;
+  margin: 0 auto;
   font-size: 1.25rem;
   color: #222;
   line-height: 2.5;
   text-align: left;
   padding: 202px;
+}
+
+.about__heading {
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  font-weight: 600;
 }

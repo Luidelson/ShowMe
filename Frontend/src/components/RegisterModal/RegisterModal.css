@@ -2,7 +2,7 @@ body {
   background: #f3f2ed;
 }
 
-.RegisterModal {
+.register-modal {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
@@ -14,19 +14,19 @@ body {
   align-items: center;
 }
 
-.RegisterModal form {
+.register-modal__form {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.RegisterModal label {
+.register-modal__label {
   margin-bottom: 6px;
   font-size: 1rem;
   color: #222;
 }
 
-.RegisterModal input {
+.register-modal__input {
   padding: 10px 12px;
   margin-bottom: 18px;
   border: 1px solid #e0e0e0;
@@ -37,12 +37,12 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
-.RegisterModal input:focus {
+.register-modal__input:focus {
   border-color: #222;
   outline: none;
 }
 
-.RegisterModal button {
+.register-modal__submit {
   padding: 12px 0;
   background: #222;
   color: #fff;
@@ -54,15 +54,15 @@ body {
   margin-bottom: 10px;
   transition: background 0.2s;
 }
-.RegisterModal button:disabled {
+.register-modal__submit:disabled {
   background: #b3b3b3;
   cursor: not-allowed;
 }
-.RegisterModal button:hover:not(:disabled) {
+.register-modal__submit:hover:not(:disabled) {
   background: #111;
 }
 
-.RegisterModal .error {
+.register-modal__error {
   color: #d32f2f;
   background: #ffeaea;
   border-radius: 4px;

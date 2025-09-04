@@ -87,49 +87,61 @@ function Content() {
 
   if (loading)
     return (
-      <div className="content-wrapper">
+      <div className="content">
         <Preloader />
       </div>
     );
-  if (error) return <div className="content-wrapper">{error}</div>;
+  if (error) return <div className="content">{error}</div>;
 
   return (
-    <div className="content-wrapper">
-      <div>
-        <div className="search-genre-row">
-          <input
-            type="text"
-            placeholder="Search shows..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-bar"
-          />
-          <select
-            value={selectedGenre}
-            onChange={(e) => setSelectedGenre(e.target.value)}
-            className="genre-dropdown"
-          >
-            <option value="">All Genres</option>
-            {Array.from(
-              new Set(shows.flatMap((show) => show.genres || []))
-            ).map((genre) => (
+    <div className="content" role="main">
+      <form
+        className="content__controls"
+        role="search"
+        aria-label="Show search form"
+        onSubmit={(e) => e.preventDefault()}
+      >
+        <label htmlFor="show-search" className="visually-hidden">
+          Search shows
+        </label>
+        <input
+          id="show-search"
+          type="text"
+          placeholder="Search shows..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="content__search"
+        />
+        <label htmlFor="genre-filter" className="visually-hidden">
+          Filter by genre
+        </label>
+        <select
+          id="genre-filter"
+          value={selectedGenre}
+          onChange={(e) => setSelectedGenre(e.target.value)}
+          className="content__genre-dropdown"
+        >
+          <option value="">All Genres</option>
+          {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
+            (genre) => (
               <option key={genre} value={genre}>
                 {genre}
               </option>
-            ))}
-          </select>
-        </div>
-        {/* Genre clear button */}
+            )
+          )}
+        </select>
         {selectedGenre && (
           <button
+            type="button"
             onClick={() => setSelectedGenre('')}
-            className="genre-clear-btn"
+            className="content__genre-clear-btn"
+            aria-label="Clear selected genre"
           >
             Clear
           </button>
         )}
-      </div>
-      <div className="shows-grid">
+      </form>
+      <section className="content__grid" aria-label="Shows list">
         {shows
           .filter(
             (show) =>
@@ -138,10 +150,19 @@ function Content() {
                 (show.genres && show.genres.includes(selectedGenre)))
           )
           .map((show) => (
-            <div
-              className="show-card"
+            <article
+              className="content__card"
               key={show.id}
               onClick={() => setModalShow(show)}
+              tabIndex={0}
+              role="button"
+              aria-label={`View details for ${show.name}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setModalShow(show);
+                }
+              }}
             >
               <img
                 src={
@@ -150,49 +171,60 @@ function Content() {
                     : 'https://static.tvmaze.com/images/no-img/no-img-portrait-text.png'
                 }
                 alt={show.name}
-                className="show-image-placeholder"
+                className="content__image"
               />
-              <div className="show-info">
-                <div>{show.name}</div>
-                <div>Premiered: {show.premiered}</div>
+              <div
+                className="content__info"
+                role="group"
+                aria-label={`${show.name} info`}
+              >
+                <h3 className="content__title">{show.name}</h3>
+                <p className="content__meta">Premiered: {show.premiered}</p>
                 {show.genres && show.genres.length > 0 && (
-                  <div>Genre: {show.genres.join(', ')}</div>
+                  <p className="content__meta">
+                    Genre: {show.genres.join(', ')}
+                  </p>
                 )}
                 {show.rating && show.rating.average && (
-                  <div>Rating: {renderStars(show.rating.average)}</div>
+                  <p className="content__meta">
+                    Rating: {renderStars(show.rating.average)}
+                  </p>
                 )}
               </div>
-            </div>
+            </article>
           ))}
-      </div>
-      <div className="pagination-row">
+      </section>
+      <nav className="content__pagination" aria-label="Pagination navigation">
         <button
           onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           disabled={currentPage === 1}
-          className="pagination-btn prev-btn"
+          className="content__pagination-btn content__pagination-btn--prev"
         >
           Previous
         </button>
-        <span className="pagination-info">
+        <span className="content__pagination-info">
           Page {currentPage} of {totalPages || '...'}
         </span>
         <button
           onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           disabled={currentPage === totalPages}
-          className="pagination-btn next-btn"
+          className="content__pagination-btn content__pagination-btn--next"
         >
           Next
         </button>
-      </div>
+      </nav>
       {modalShow && (
         <div
-          className="content-modal-overlay"
+          className="content__modal-overlay"
           onClick={() => setModalShow(null)}
           style={{ cursor: 'pointer' }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="show-modal-title"
         >
-          <div className="content-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="content__modal" onClick={(e) => e.stopPropagation()}>
             <button
-              className="content-modal-close"
+              className="content__modal-close"
               style={{
                 position: 'absolute',
                 top: 16,
@@ -215,9 +247,9 @@ function Content() {
                   : 'https://static.tvmaze.com/images/no-img/no-img-portrait-text.png'
               }
               alt={modalShow.name}
-              className="show-image-placeholder modal-image"
+              className="content__image content__image--modal"
             />
-            <h2>{modalShow.name}</h2>
+            <h2 id="show-modal-title">{modalShow.name}</h2>
             <p>
               <strong>Premiered:</strong> {modalShow.premiered}
             </p>
@@ -247,26 +279,28 @@ function Content() {
                 />
               </div>
             )}
-            <button
-              className="add-show-btn"
-              style={{
-                marginTop: 24,
-                background: '#4fc3f7',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 6,
-                padding: '12px 24px',
-                fontWeight: 500,
-                fontSize: 16,
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                handleAddShow(modalShow);
-                setModalShow(null);
-              }}
-            >
-              + Add Show
-            </button>
+            {localStorage.getItem('token') && (
+              <button
+                className="content__add-show-btn"
+                style={{
+                  marginTop: 24,
+                  background: '#4fc3f7',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '12px 24px',
+                  fontWeight: 500,
+                  fontSize: 16,
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  handleAddShow(modalShow);
+                  setModalShow(null);
+                }}
+              >
+                + Add Show
+              </button>
+            )}
           </div>
         </div>
       )}

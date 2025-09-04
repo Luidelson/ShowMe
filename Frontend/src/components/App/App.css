@@ -1,6 +1,5 @@
-
-.App {
-  font-family: "Inter", Arial, sans-serif;
+.app {
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
   background: #fff;
   min-height: 100vh;
   width: 100vw;
@@ -8,8 +7,7 @@
   flex-direction: column;
   overflow-x: hidden;
 }
-
-.main-content {
+.app__main {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -18,46 +16,49 @@
   box-sizing: border-box;
   background-color: #ebebe5;
 }
-.circle-container {
+.app__circle-container {
   position: relative;
   width: 500px;
   height: 500px;
   display: flex;
   align-items: center;
 }
-
-.features-circle {
+.app__features-circle {
   width: 700px;
   height: 700px;
   background: #f26d6d;
   border-radius: 50%;
   position: absolute;
-  left: -110px;
-  top: -100px;
+  left: -160px; /* further left */
+  top: -240px; /* pushed further up */
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.features-circle ul {
+.app__features-circle ul {
   list-style: none;
   color: #fff;
   font-size: 1.08rem;
   padding-left: 0;
   font-weight: 500;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  text-align: center; /* centered text */
+  width: 100%;
+  margin-top: 140px; /* push text even further downward */
+  margin-left: 40px; /* nudge right */
 }
-.features-circle li {
+.app__features-circle li {
   margin-bottom: 32px;
   display: flex;
   align-items: center;
+  justify-content: center; /* center items */
 }
-.check {
+.app__check {
   font-size: 2.1rem;
   margin-right: 18px;
   font-weight: bold;
 }
-
-.register-form {
+.app__register-form {
   background: #fff;
   border: 1px solid #eee;
   border-radius: 12px;
@@ -66,17 +67,17 @@
   min-width: 340px;
   margin-right: 400px;
   margin-top: 150px;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
-.register-form label {
+.app__register-form label {
   display: block;
   margin-bottom: 7px;
   font-size: 1.05rem;
   color: #222;
   font-weight: 500;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
-.register-form input {
+.app__register-form input {
   width: 100%;
   padding: 9px;
   margin-bottom: 20px;
@@ -84,9 +85,9 @@
   border: 1px solid #ccc;
   font-size: 1.05rem;
   background: #fafafa;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
-.login-btn {
+.app__login-btn {
   width: 100%;
   padding: 11px;
   background: #222;
@@ -96,10 +97,9 @@
   font-size: 1.05rem;
   cursor: pointer;
   font-weight: 500;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
-
-.register-btn {
+.app__register-btn {
   width: 100%;
   padding: 11px;
   background-color: white;
@@ -109,5 +109,107 @@
   font-size: 1.05rem;
   cursor: pointer;
   font-weight: 500;
-  font-family: "Inter", Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* Utility */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  /* Keep desktop circle dimensions */
+  .app__features-circle {
+    width: 700px;
+    height: 700px;
+    left: -160px;
+    top: -240px;
+    position: absolute;
+  }
+  .app__circle-container {
+    width: 500px;
+    height: 500px;
+  }
+  .app__register-form {
+    margin-right: 200px;
+  }
+}
+@media (max-width: 980px) {
+  .app__main {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 12px 72px;
+  }
+  /* Preserve desktop circle look */
+  .app__circle-container {
+    width: 500px;
+    height: 500px;
+  }
+  .app__features-circle {
+    width: 700px;
+    height: 700px;
+    left: -160px;
+    top: -240px;
+    position: absolute;
+    padding: 0;
+  }
+  .app__features-circle ul {
+    font-size: 1rem;
+    text-align: center;
+  }
+  .app__features-circle li {
+    margin-bottom: 32px;
+  }
+  .app__register-form {
+    margin-top: 150px;
+    margin-right: 0;
+  }
+}
+@media (max-width: 560px) {
+  /* Force desktop circle styling even on very small screens */
+  .app__features-circle {
+    width: 700px;
+    height: 700px;
+    left: -160px;
+    top: -240px;
+    position: absolute;
+    padding: 0;
+  }
+  .app__circle-container {
+    width: 500px;
+    height: 500px;
+  }
+  .app__check {
+    font-size: 2.1rem;
+    margin-right: 18px;
+  }
+  .app__register-form {
+    margin-top: 150px;
+    padding: 32px 32px 24px;
+  }
+}
+@media (max-width: 400px) {
+  .app__features-circle {
+    width: 700px;
+    height: 700px;
+    left: -160px;
+    top: -240px;
+  }
+  .app__check {
+    font-size: 2.1rem;
+  }
+  .app__features-circle ul {
+    font-size: 1.08rem;
+    text-align: center;
+  }
 }

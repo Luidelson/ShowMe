@@ -95,28 +95,61 @@ function Profile({ user, onLogout }) {
     setShowEdit(false);
   };
 
+  // Close any open profile-related modal with Escape
+  React.useEffect(() => {
+    if (!showEdit && !editShowModal) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (editShowModal) setEditShowModal(null);
+        if (showEdit) setShowEdit(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showEdit, editShowModal]);
+
   return (
-    <div className="profile-wrapper">
-      <aside className="profile-sidebar">
-        <div className="profile-header-row">
+    <div className="profile">
+      <aside className="profile__sidebar" aria-labelledby="profile-heading">
+        <div className="profile__header">
           {displayAvatar && (
-            <img src={displayAvatar} alt="Profile" className="profile-avatar" />
+            <img
+              src={displayAvatar}
+              alt="Profile"
+              className="profile__avatar"
+            />
           )}
-          <div className="profile-name">{displayName || 'Profile Name'}</div>
+          <h1 id="profile-heading" className="profile__name">
+            {displayName || 'Profile Name'}
+          </h1>
         </div>
         {/* Edit Profile button above Sign Out button */}
-        <button className="profile-edit-btn" onClick={() => setShowEdit(true)}>
+        <button className="profile__edit-btn" onClick={() => setShowEdit(true)}>
           Edit Profile
         </button>
-        <br></br>
-        <button className="profile-signout-btn" onClick={onLogout}>
+        <button className="profile__signout-btn" onClick={onLogout}>
           Sign Out
         </button>
         {/* Modal for editing profile */}
         {showEdit && (
-          <div className="profile-edit-overlay">
-            <div className="profile-edit-modal">
-              <form onSubmit={handleEditSubmit} className="profile-edit-form">
+          <div
+            className="profile__overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-title"
+          >
+            <div className="profile__modal" role="document">
+              <button
+                className="profile__modal-close"
+                aria-label="Close"
+                onClick={() => setShowEdit(false)}
+              >
+                &times;
+              </button>
+              <form onSubmit={handleEditSubmit} className="profile__form">
+                <h2 id="edit-profile-title" className="visually-hidden">
+                  Edit profile
+                </h2>
                 <label htmlFor="edit-username">Profile Name</label>
                 <input
                   id="edit-username"
@@ -133,12 +166,12 @@ function Profile({ user, onLogout }) {
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="Paste image URL"
                 />
-                <button type="submit" className="profile-save-btn">
+                <button type="submit" className="profile__save-btn">
                   Save
                 </button>
                 <button
                   type="button"
-                  className="profile-cancel-btn"
+                  className="profile__cancel-btn"
                   onClick={() => setShowEdit(false)}
                 >
                   Cancel
@@ -148,10 +181,12 @@ function Profile({ user, onLogout }) {
           </div>
         )}
       </aside>
-      <main className="profile-main">
-        <h2 className="profile-myshows-heading">My Shows</h2>
-        <div className="shows-grid">
-          {myShows.length === 0 && <div>No shows added yet.</div>}
+      <main className="profile__main" aria-labelledby="my-shows-heading">
+        <h2 className="profile__myshows-heading" id="my-shows-heading">
+          My Shows
+        </h2>
+        <section className="profile__shows-grid" aria-label="Saved shows list">
+          {myShows.length === 0 && <p>No shows added yet.</p>}
           {myShows.map((show) => {
             // Use TVmaze image if available, fallback to placeholder
             const imageSrc =
@@ -163,8 +198,9 @@ function Profile({ user, onLogout }) {
                     ? show.image_thumbnail_path
                     : 'https://static.tvmaze.com/images/no-img/no-img-portrait-text.png';
             return (
-              <div
-                className="show-card"
+              <article
+                className="profile__card"
+                aria-labelledby={`show-title-${show.showId}`}
                 key={show.showId}
                 onClick={() => {
                   setEditShowModal(show);
@@ -175,39 +211,55 @@ function Profile({ user, onLogout }) {
                 <img
                   src={imageSrc}
                   alt={show.name}
-                  className="show-image-placeholder profile-show-image"
+                  className="profile__image"
                   loading="lazy"
                 />
-                <div className="show-info">
-                  <div>{show.name}</div>
-                  <div>Start: {show.start_date}</div>
-                  <div>Season: {show.season || '-'}</div>
-                  <div>Episode: {show.episode || '-'}</div>
+                <div
+                  className="profile__info"
+                  role="group"
+                  aria-label={`${show.name} progress`}
+                >
+                  <h3
+                    id={`show-title-${show.showId}`}
+                    className="profile__show-title"
+                  >
+                    {show.name}
+                  </h3>
+                  <p className="profile__meta">Start: {show.start_date}</p>
+                  <p className="profile__meta">Season: {show.season || '-'}</p>
+                  <p className="profile__meta">
+                    Episode: {show.episode || '-'}
+                  </p>
                 </div>
-              </div>
+              </article>
             );
           })}
-        </div>
+        </section>
       </main>
       {/* Show Edit Modal */}
       {editShowModal && (
-        <div className="profile-edit-overlay">
-          <div className="profile-edit-modal">
+        <div
+          className="profile__overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-show-title"
+        >
+          <div className="profile__modal" role="document">
             {editShowModal.image_thumbnail_path && (
               <img
                 src={editShowModal.image_thumbnail_path}
                 alt={editShowModal.name}
-                className="profile-edit-image"
+                className="profile__edit-image"
               />
             )}
             <button
-              className="profile-edit-close"
+              className="profile__modal-close"
               aria-label="Close"
               onClick={() => setEditShowModal(null)}
             >
               &times;
             </button>
-            <h3>Edit Show Progress</h3>
+            <h3 id="edit-show-title">Edit Show Progress</h3>
             <div style={{ marginBottom: 12 }}>
               <b>{editShowModal.name}</b>
             </div>
@@ -282,12 +334,12 @@ function Profile({ user, onLogout }) {
                 onChange={(e) => setEditEpisode(e.target.value)}
                 required
               />
-              <button type="submit" className="profile-save-btn">
+              <button type="submit" className="profile__save-btn">
                 Save
               </button>
               <button
                 type="button"
-                className="profile-cancel-btn"
+                className="profile__cancel-btn"
                 onClick={async () => {
                   const token = localStorage.getItem('token');
                   await fetch(

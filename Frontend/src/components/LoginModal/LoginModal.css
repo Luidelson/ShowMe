@@ -2,7 +2,7 @@ body {
   background: #f3f2ed;
 }
 
-.LoginModal {
+.login-modal {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -14,19 +14,19 @@ body {
   align-items: center;
 }
 
-.LoginModal form {
+.login-modal__form {
   width: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.LoginModal label {
+.login-modal__label {
   margin-bottom: 6px;
   font-size: 1rem;
   color: #222;
 }
 
-.LoginModal input {
+.login-modal__input {
   padding: 10px 12px;
   margin-bottom: 18px;
   border: 1px solid #e0e0e0;
@@ -37,12 +37,12 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
-.LoginModal input:focus {
+.login-modal__input:focus {
   border-color: #222;
   outline: none;
 }
 
-.LoginModal button {
+.login-modal__submit {
   padding: 12px 0;
   background: #222;
   color: #fff;
@@ -54,15 +54,15 @@ body {
   margin-bottom: 10px;
   transition: background 0.2s;
 }
-.LoginModal button:disabled {
+.login-modal__submit:disabled {
   background: #b3b3b3;
   cursor: not-allowed;
 }
-.LoginModal button:hover:not(:disabled) {
+.login-modal__submit:hover:not(:disabled) {
   background: #111;
 }
 
-.LoginModal .error {
+.login-modal__error {
   color: #d32f2f;
   background: #ffeaea;
   border-radius: 4px;

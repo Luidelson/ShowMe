@@ -30,15 +30,16 @@ function LoginModal({ onLogin }) {
   };
 
   return (
-    <div className="LoginModal">
-      <form onSubmit={handleSubmit}>
-        <h2>Login</h2>
+    <div className="login-modal">
+      <form onSubmit={handleSubmit} className="login-modal__form">
+        <h2 className="login-modal__title">Login</h2>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className="login-modal__input"
         />
         <input
           type="password"
@@ -46,11 +47,12 @@ function LoginModal({ onLogin }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className="login-modal__input"
         />
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="login-modal__submit">
           {loading ? 'Logging in...' : 'Login'}
         </button>
-        {error && <div className="error">{error}</div>}
+        {error && <div className="login-modal__error">{error}</div>}
       </form>
     </div>
   );

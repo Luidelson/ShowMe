@@ -1,5 +1,5 @@
 /* Genre dropdown styles */
-.genre-dropdown {
+.content__genre-dropdown {
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid #4fc3f7;
@@ -9,7 +9,7 @@
 }
 
 /* Genre clear button styles */
-.genre-clear-btn {
+.content__genre-clear-btn {
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid #aaa;
@@ -21,7 +21,7 @@
 }
 
 /* Show card image styles */
-.show-card .show-image-placeholder {
+.content__card .content__image {
   width: 120px;
   height: 100px;
   object-fit: cover;
@@ -30,7 +30,7 @@
 }
 
 /* Modal image styles */
-.modal-image {
+.content__image--modal {
   width: 180px;
   height: 150px;
   border-radius: 8px;
@@ -38,7 +38,7 @@
 }
 
 /* Pagination row styles */
-.pagination-row {
+.content__pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -46,38 +46,38 @@
   gap: 8px;
   padding-bottom: 8px;
 }
-.pagination-btn {
+.content__pagination-btn {
   padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid #ccc;
   background: #fff;
   cursor: pointer;
 }
-.pagination-btn:disabled {
+.content__pagination-btn:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
-.pagination-info {
+.content__pagination-info {
   font-weight: 500;
   margin: 0 12px;
 }
 /* Responsive design for phones */
 @media (max-width: 600px) {
-  .content-wrapper {
+  .content {
     padding: 8px 2px 0 2px;
     min-height: 60vh;
   }
-  .shows-grid {
+  .content__grid {
     gap: 10px;
     justify-content: center;
   }
-  .show-card {
+  .content__card {
     width: 95vw;
     max-width: 320px;
     padding: 8px;
     margin: 0 auto;
   }
-  .show-image-placeholder {
+  .content__image {
     width: 90vw;
     max-width: 300px;
     height: 160px;
@@ -86,14 +86,14 @@
     margin-right: auto;
     margin-left: auto;
   }
-  .search-genre-row {
+  .content__controls {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     margin-bottom: 10px;
   }
-  .search-bar {
+  .content__search {
     display: block !important;
     width: 90vw !important;
     max-width: 400px !important;
@@ -107,36 +107,34 @@
     opacity: 1 !important;
     visibility: visible !important;
   }
-  .genre-dropdown {
+  .content__genre-dropdown {
     min-width: 100px;
     font-size: 15px;
     flex: none;
   }
-  .content-modal {
+  .content__modal {
     min-width: 90vw;
     max-width: 98vw;
     padding: 18px 6px 12px 6px;
   }
-  .content-modal .show-image-placeholder {
+  .content__modal .content__image {
     width: 90vw;
     max-width: 300px;
     height: 160px;
   }
 }
-.content-wrapper {
+.content {
   background: #e2e2e2;
   padding: 32px 16px 0 16px;
   min-height: 70vh;
 }
-
-.shows-grid {
+.content__grid {
   display: flex;
   gap: 24px;
   flex-wrap: wrap;
   justify-content: flex-start;
 }
-
-.show-card {
+.content__card {
   /* background: #fff; */
   background: #c9c3c3;
   border-radius: 8px;
@@ -147,12 +145,10 @@
   flex-direction: column;
   align-items: center;
 }
-
-.show-image-placeholder {
+.content__image {
   margin-bottom: 12px;
 }
-
-.show-info {
+.content__info {
   width: 100%;
   text-align: left;
   font-size: 1rem;
@@ -175,18 +171,26 @@
   animation: spin 0.75s infinite linear;
 }
 
-.search-bar {
+.content__search {
   margin-bottom: 20px;
-
-  margin-left: 680px;
+  /* remove large desktop left offset to allow full-width scaling */
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid #ccc;
   width: 100%;
   display: flex;
-  margin-left: 100p;
   max-width: 400px;
   font-size: 16px;
+}
+
+/* Wider tablet breakpoint adjustments */
+@media (max-width: 900px) {
+  .content__grid {
+    gap: 16px;
+  }
+  .content__card {
+    width: 160px;
+  }
 }
 
 @keyframes spin {
@@ -195,7 +199,7 @@
   }
 }
 
-.content-modal-overlay {
+.content__modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -208,7 +212,7 @@
   justify-content: center;
 }
 
-.content-modal {
+.content__modal {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.18);
@@ -222,7 +226,7 @@
   align-items: center;
 }
 
-.content-modal-close {
+.content__modal-close {
   position: absolute;
   top: 16px;
   right: 16px;
@@ -233,7 +237,7 @@
   cursor: pointer;
 }
 
-.content-modal .show-image-placeholder {
+.content__modal .content__image {
   width: 180px;
   height: 120px;
   object-fit: cover;
@@ -241,13 +245,11 @@
   background: #eee;
   margin-bottom: 18px;
 }
-
-.content-modal .show-info {
+.content__modal .content__info {
   text-align: center;
   margin-bottom: 12px;
 }
-
-.content-modal .add-show-btn {
+.content__modal .content__add-show-btn {
   margin-top: 18px;
   padding: 8px 18px;
   border-radius: 6px;
@@ -258,7 +260,6 @@
   cursor: pointer;
   transition: background 0.2s;
 }
-
-.content-modal .add-show-btn:hover {
+.content__modal .content__add-show-btn:hover {
   background: #115293;
 }
