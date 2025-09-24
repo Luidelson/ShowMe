@@ -1,39 +1,36 @@
-import './RegisterModal.css';
-import { useState } from 'react';
+import "./RegisterModal.css";
+import { useState } from "react";
 
 function RegisterModal({ onRegister }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
     try {
-      const response = await fetch(
-        'https://api.showme.jumpingcrab.com/api/register',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, confirmPassword }),
-        }
-      );
+      const response = await fetch("http://localhost:3001/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, confirmPassword }),
+      });
       const data = await response.json();
       if (response.ok) {
         if (onRegister) onRegister(data);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.message || "Registration failed");
       }
     } catch (err) {
-      setError('Network error');
+      setError("Network error");
     }
     setLoading(false);
   };
@@ -71,7 +68,7 @@ function RegisterModal({ onRegister }) {
           disabled={loading}
           className="register-modal__submit"
         >
-          {loading ? 'Registering...' : 'Register'}
+          {loading ? "Registering..." : "Register"}
         </button>
         {error && <div className="register-modal__error">{error}</div>}
       </form>

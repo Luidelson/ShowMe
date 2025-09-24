@@ -1,30 +1,30 @@
-import './LoginModal.css';
-import { useState } from 'react';
+import "./LoginModal.css";
+import { useState } from "react";
 
 function LoginModal({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
     try {
-  const response = await fetch('https://api.showme.jumpingcrab.com/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const data = await response.json();
       if (response.ok) {
         if (onLogin) onLogin(data);
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || "Login failed");
       }
     } catch (err) {
-      setError('Network error');
+      setError("Network error");
     }
     setLoading(false);
   };
@@ -49,8 +49,12 @@ function LoginModal({ onLogin }) {
           required
           className="login-modal__input"
         />
-        <button type="submit" disabled={loading} className="login-modal__submit">
-          {loading ? 'Logging in...' : 'Login'}
+        <button
+          type="submit"
+          disabled={loading}
+          className="login-modal__submit"
+        >
+          {loading ? "Logging in..." : "Login"}
         </button>
         {error && <div className="login-modal__error">{error}</div>}
       </form>

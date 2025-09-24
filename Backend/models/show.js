@@ -10,6 +10,11 @@ const ShowSchema = new mongoose.Schema({
   episode: String,
   genres: [String],
   rating: Object,
+  status: {
+    type: String,
+    enum: ["finished", "watch_later", null],
+    default: null,
+  },
 });
 
 // Ensure only one show per user per showId

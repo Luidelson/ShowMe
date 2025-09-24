@@ -10,8 +10,27 @@ exports.saveShow = async (req, res) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded.userId || decoded.id;
-    const { showId, name, image, start_date, season, episode, genres, rating } = req.body;
+    const {
+      showId,
+      name,
+      image,
+      start_date,
+      season,
+      episode,
+      genres,
+      rating,
+      status,
+      finished,
+      watchLater,
+    } = req.body;
     if (!showId) return res.status(400).json({ error: "Missing showId." });
+    // Determine status from explicit status, or from finished/watchLater booleans for backward compatibility
+    let newStatus = status;
+    if (typeof newStatus === "undefined") {
+      if (finished === true) newStatus = "finished";
+      else if (watchLater === true) newStatus = "watch_later";
+      else newStatus = null;
+    }
     // Upsert: update if exists, create if not
     const show = await Show.findOneAndUpdate(
       { userId, showId },
@@ -24,6 +43,7 @@ exports.saveShow = async (req, res) => {
           episode,
           genres,
           rating,
+          status: newStatus,
         },
       },
       { new: true, upsert: true }

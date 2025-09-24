@@ -38,6 +38,15 @@ function Navigation({ user }) {
       >
         <li className="navigation__item">
           <Link
+            to="/movies"
+            className="navigation__link"
+            onClick={handleLinkClick}
+          >
+            Movies
+          </Link>
+        </li>
+        <li className="navigation__item">
+          <Link
             to="/shows"
             className="navigation__link"
             onClick={handleLinkClick}

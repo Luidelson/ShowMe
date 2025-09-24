@@ -1,77 +1,48 @@
-import React, { useEffect, useState, useRef } from "react";
-import "./Content.css";
+// Save movie to backend for logged-in user
+const handleAddMovie = async (movie) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+  await fetch("http://localhost:3001/api/save-movie", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      movieId: movie.id,
+      name: movie.title,
+      image: {
+        medium: movie.poster_path
+          ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+          : null,
+      },
+      release_date: movie.release_date,
+      genres: movie.genre_names,
+      rating: { average: movie.vote_average },
+    }),
+  });
+  // Optionally, show a message or refresh saved movies in Profile
+};
+
+import React, { useState, useEffect, useRef } from "react";
+import "../Content/Content.css";
 import Preloader from "../Preloader/Preloader";
 
-function Content() {
-  const [shows, setShows] = useState([]);
+function Movies() {
+  const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalMovie, setModalMovie] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const moviesPerPage = 100;
+  const [totalResults, setTotalResults] = useState(0);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [genres, setGenres] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("all");
   const debounceTimeout = useRef();
-  const [modalShow, setModalShow] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(null);
-  const [selectedGenre, setSelectedGenre] = useState("");
-  const showsPerPage = 100;
 
-  // Close modal on Escape key
-  React.useEffect(() => {
-    if (!modalShow) return;
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape") setModalShow(null);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [modalShow]);
-
-  // Helper to render stars from rating (out of 10)
-  const renderStars = (rating) => {
-    if (typeof rating !== "number") return null;
-    const stars = Math.round(rating / 2); // Convert 10 scale to 5 stars
-    return (
-      <span style={{ color: "#FFD700", fontSize: 18 }}>
-        {"★".repeat(stars)}
-        {"☆".repeat(5 - stars)}
-      </span>
-    );
-  };
-
-  // Save show to backend for logged-in user
-  const handleAddShow = async (show) => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    await fetch("http://localhost:3001/api/save-show", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        showId: show.id,
-        name: show.name,
-        image: show.image,
-        start_date: show.premiered,
-        genres: show.genres,
-        rating: show.rating,
-      }),
-    });
-    // Optionally, you can show a message or refresh saved shows in Profile
-  };
-
-  // Fetch max page count on mount
-  useEffect(() => {
-    fetch("http://localhost:3001/api/max-pages")
-      .then((res) => res.json())
-      .then((data) => {
-        setTotalPages(data.maxPages);
-      })
-      .catch(() => {
-        setTotalPages(1); // fallback
-      });
-  }, []);
-
-  // Debounce search input for smooth UX
+  // Debounce search input (must be at top level, not inside another useEffect)
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
@@ -88,26 +59,41 @@ function Content() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    // Build query params for search and genre
     const params = new URLSearchParams();
     if (debouncedSearch) params.append("search", debouncedSearch);
-    if (selectedGenre) params.append("genre", selectedGenre);
+    if (selectedGenre && selectedGenre !== "all")
+      params.append("genre", selectedGenre);
     params.append("page", currentPage);
-    params.append("perPage", showsPerPage);
+    params.append("perPage", moviesPerPage);
 
-    fetch(
-      `http://localhost:3001/api/all-shows-merged-7000?${params.toString()}`
-    )
+    fetch(`http://localhost:3001/api/all-movies?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => {
-        setShows(Array.isArray(data.shows) ? data.shows : []);
-        setTotalPages(data.totalPages || 1);
+        // data.movies: array of TMDb movie objects, data.totalResults, data.genres
+        setMovies(Array.isArray(data.movies) ? data.movies : []);
+        setTotalResults(data.totalResults || 0);
+        setGenres(["all", ...(data.genres || [])]);
       })
       .catch(() => {
-        setError("Failed to fetch shows.");
-        setShows([]);
+        setError("Error loading movies. Try again later.");
+        setMovies([]);
+        setTotalResults(0);
       })
       .finally(() => setLoading(false));
   }, [currentPage, debouncedSearch, selectedGenre]);
+
+  // Helper to render stars from rating (out of 10)
+  const renderStars = (rating) => {
+    if (typeof rating !== "number") return null;
+    const stars = Math.round(rating / 2); // Convert 10 scale to 5 stars
+    return (
+      <span style={{ color: "#FFD700", fontSize: 18 }}>
+        {"★".repeat(stars)}
+        {"☆".repeat(5 - stars)}
+      </span>
+    );
+  };
 
   if (loading)
     return (
@@ -117,21 +103,24 @@ function Content() {
     );
   if (error) return <div className="content">{error}</div>;
 
+  const totalPages = Math.ceil(totalResults / moviesPerPage) || 1;
+  const pagedMovies = movies;
+
   return (
     <div className="content" role="main">
       <form
         className="content__controls"
         role="search"
-        aria-label="Show search form"
+        aria-label="Movie search form"
         onSubmit={(e) => e.preventDefault()}
       >
-        <label htmlFor="show-search" className="visually-hidden">
-          Search shows
+        <label htmlFor="movie-search" className="visually-hidden">
+          Search movies
         </label>
         <input
-          id="show-search"
+          id="movie-search"
           type="text"
-          placeholder="Search shows..."
+          placeholder="Search movies..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="content__search"
@@ -142,22 +131,22 @@ function Content() {
         <select
           id="genre-filter"
           value={selectedGenre}
-          onChange={(e) => setSelectedGenre(e.target.value)}
+          onChange={(e) => {
+            setSelectedGenre(e.target.value);
+            setCurrentPage(1);
+          }}
           className="content__genre-dropdown"
         >
-          <option value="">All Genres</option>
-          {Array.from(new Set(shows.flatMap((show) => show.genres || []))).map(
-            (genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
-            )
-          )}
+          {genres.map((genre) => (
+            <option key={genre} value={genre}>
+              {genre === "all" ? "All genres" : genre}
+            </option>
+          ))}
         </select>
-        {selectedGenre && (
+        {selectedGenre && selectedGenre !== "all" && (
           <button
             type="button"
-            onClick={() => setSelectedGenre("")}
+            onClick={() => setSelectedGenre("all")}
             className="content__genre-clear-btn"
             aria-label="Clear selected genre"
           >
@@ -165,44 +154,45 @@ function Content() {
           </button>
         )}
       </form>
-      <section className="content__grid" aria-label="Shows list">
-        {shows.map((show) => (
+      <section className="content__grid" aria-label="Movies list">
+        {pagedMovies.map((movie) => (
           <article
             className="content__card"
-            key={show.id}
-            onClick={() => setModalShow(show)}
+            key={movie.id}
+            onClick={() => setModalMovie(movie)}
             tabIndex={0}
             role="button"
-            aria-label={`View details for ${show.name}`}
+            aria-label={`View details for ${movie.title}`}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                setModalShow(show);
+                setModalMovie(movie);
               }
             }}
           >
             <img
               src={
-                show.image && show.image.medium
-                  ? show.image.medium
-                  : "https://static.tvmaze.com/images/no-img/no-img-portrait-text.png"
+                movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+                  : "https://via.placeholder.com/300x450?text=No+Image"
               }
-              alt={show.name}
+              alt={movie.title}
               className="content__image"
+              style={{ background: "#eee", objectFit: "cover" }}
             />
             <div
               className="content__info"
               role="group"
-              aria-label={`${show.name} info`}
+              aria-label={`${movie.title} info`}
             >
-              <h3 className="content__title">{show.name}</h3>
-              <p className="content__meta">Premiered: {show.premiered}</p>
-              {show.genres && show.genres.length > 0 && (
-                <p className="content__meta">Genre: {show.genres.join(", ")}</p>
-              )}
-              {show.rating && show.rating.average && (
+              <h3 className="content__title">{movie.title}</h3>
+              <p className="content__meta">
+                Year:{" "}
+                {movie.release_date ? movie.release_date.slice(0, 4) : "N/A"}
+              </p>
+              {movie.vote_average && (
                 <p className="content__meta">
-                  Rating: {renderStars(show.rating.average)}
+                  Rating: {renderStars(movie.vote_average)}
                 </p>
               )}
             </div>
@@ -228,14 +218,14 @@ function Content() {
           Next
         </button>
       </nav>
-      {modalShow && (
+      {modalMovie && (
         <div
           className="content__modal-overlay"
-          onClick={() => setModalShow(null)}
+          onClick={() => setModalMovie(null)}
           style={{ cursor: "pointer" }}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="show-modal-title"
+          aria-labelledby="movie-modal-title"
         >
           <div className="content__modal" onClick={(e) => e.stopPropagation()}>
             <button
@@ -250,37 +240,37 @@ function Content() {
                 cursor: "pointer",
                 color: "#888",
               }}
-              onClick={() => setModalShow(null)}
+              onClick={() => setModalMovie(null)}
               aria-label="Close"
             >
               &times;
             </button>
             <img
               src={
-                modalShow.image && modalShow.image.medium
-                  ? modalShow.image.medium
-                  : "https://static.tvmaze.com/images/no-img/no-img-portrait-text.png"
+                modalMovie.poster_path
+                  ? `https://image.tmdb.org/t/p/w300${modalMovie.poster_path}`
+                  : "https://via.placeholder.com/300x450?text=No+Image"
               }
-              alt={modalShow.name}
+              alt={modalMovie.title}
               className="content__image content__image--modal"
             />
-            <h2 id="show-modal-title">{modalShow.name}</h2>
+            <h2 id="movie-modal-title">{modalMovie.title}</h2>
             <p>
-              <strong>Premiered:</strong> {modalShow.premiered}
+              <strong>Release Date:</strong> {modalMovie.release_date || "N/A"}
             </p>
-            {modalShow.genres && modalShow.genres.length > 0 && (
+            {modalMovie.genre_names && modalMovie.genre_names.length > 0 && (
               <p>
-                <strong>Genre:</strong> {modalShow.genres.join(", ")}
+                <strong>Genre:</strong> {modalMovie.genre_names.join(", ")}
               </p>
             )}
-            {modalShow.rating && modalShow.rating.average && (
+            {modalMovie.vote_average && (
               <p>
-                <strong>Rating:</strong> {renderStars(modalShow.rating.average)}
+                <strong>Rating:</strong> {renderStars(modalMovie.vote_average)}
               </p>
             )}
-            {modalShow.summary && (
+            {modalMovie.overview && (
               <div style={{ marginTop: 16 }}>
-                <strong>Summary:</strong>
+                <strong>Overview:</strong>
                 <div
                   style={{
                     fontSize: 15,
@@ -290,8 +280,9 @@ function Content() {
                     overflowY: "auto",
                     paddingRight: 4,
                   }}
-                  dangerouslySetInnerHTML={{ __html: modalShow.summary }}
-                />
+                >
+                  {modalMovie.overview}
+                </div>
               </div>
             )}
             {localStorage.getItem("token") && (
@@ -309,11 +300,11 @@ function Content() {
                   cursor: "pointer",
                 }}
                 onClick={() => {
-                  handleAddShow(modalShow);
-                  setModalShow(null);
+                  handleAddMovie(modalMovie);
+                  setModalMovie(null);
                 }}
               >
-                + Add Show
+                + Add Movie
               </button>
             )}
           </div>
@@ -322,5 +313,4 @@ function Content() {
     </div>
   );
 }
-
-export default Content;
+export default Movies;

@@ -1,25 +1,26 @@
-import './App.css';
-import React, { useState } from 'react';
-import Footer from '../Footer/Footer';
-import Navigation from '../Navigation/Navigation';
-import { Routes, Route } from 'react-router-dom';
-import About from '../About/About';
-import Content from '../Content/Content';
-import Profile from '../Profile/Profile';
-import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
-import LoginModal from '../LoginModal/LoginModal';
-import RegisterModal from '../RegisterModal/RegisterModal';
+import "./App.css";
+import React, { useState } from "react";
+import Footer from "../Footer/Footer";
+import Navigation from "../Navigation/Navigation";
+import { Routes, Route } from "react-router-dom";
+import About from "../About/About";
+import Content from "../Content/Content";
+import Profile from "../Profile/Profile";
+import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
+import LoginModal from "../LoginModal/LoginModal";
+import RegisterModal from "../RegisterModal/RegisterModal";
+import Movies from "../Movies/Movies";
 
 function App() {
   const [showRegister, setShowRegister] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return Boolean(localStorage.getItem('token'));
+    return Boolean(localStorage.getItem("token"));
   });
   const [user, setUser] = useState(null);
 
   const handleLogin = (data) => {
     if (data.token) {
-      localStorage.setItem('token', data.token);
+      localStorage.setItem("token", data.token);
       setIsAuthenticated(true);
       setUser(data.user);
     }
@@ -27,7 +28,7 @@ function App() {
 
   const handleRegister = (data) => {
     if (data.token) {
-      localStorage.setItem('token', data.token);
+      localStorage.setItem("token", data.token);
       setIsAuthenticated(true);
       setUser(data.user);
       setShowRegister(false);
@@ -35,7 +36,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setIsAuthenticated(false);
     setUser(null);
   };
@@ -91,7 +92,7 @@ function App() {
                     className="app__register-btn"
                     onClick={() => setShowRegister(!showRegister)}
                   >
-                    {showRegister ? 'Back to Login' : 'Register'}
+                    {showRegister ? "Back to Login" : "Register"}
                   </button>
                 </div>
               </div>
@@ -100,6 +101,7 @@ function App() {
         />
         <Route path="/shows" element={<Content />} />
         <Route path="/about" element={<About />} />
+        <Route path="/movies" element={<Movies />} />
         <Route
           path="/profile"
           element={

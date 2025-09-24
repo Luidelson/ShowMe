@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const User = require("./models/user");
 const showsApi = require("./routes/showsApi");
+const moviesApi = require("./routes/moviesApi");
+const allMoviesApi = require("./routes/allMoviesApi");
 const app = express();
 app.use(
   cors({
@@ -112,6 +114,8 @@ app.put("/api/profile", async (req, res) => {
 });
 
 app.use("/api", showsApi);
+app.use("/api", moviesApi);
+app.use("/api", allMoviesApi);
 
 const PORT = process.env.PORT || 3001;
 // GET /items returns an empty array
