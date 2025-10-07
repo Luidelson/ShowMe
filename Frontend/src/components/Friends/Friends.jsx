@@ -1,0 +1,824 @@
+import React, { useEffect, useState } from "react";
+import "../Profile/Profile.css";
+
+function Friends({ user }) {
+  const [showFriendMedia, setShowFriendMedia] = useState(false);
+  const [friendMedia, setFriendMedia] = useState({ shows: [], movies: [] });
+  const [activeFriend, setActiveFriend] = useState(null);
+  // ...existing code...
+  const [showRequests, setShowRequests] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [username, setUsername] = useState(user?.username || "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || "");
+  const [displayName, setDisplayName] = useState(user?.username || "");
+  const [displayAvatar, setDisplayAvatar] = useState(user?.avatarUrl || "");
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState(() => {
+    try {
+      const stored = localStorage.getItem("sentFriendRequests");
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("sentFriendRequests");
+      if (stored) setSentRequests(JSON.parse(stored));
+    } catch (e) {}
+  }, []);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    window.location.replace("/");
+  };
+  const handleUserSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearchLoading(true);
+    setSearchError(null);
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/users/search?query=${encodeURIComponent(searchQuery)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setSearchResults(data.users || []);
+      } else {
+        setSearchError(data.error || "Search failed");
+      }
+    } catch (err) {
+      setSearchError("Network error");
+    }
+    setSearchLoading(false);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    fetch("http://localhost:3001/api/profile", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setDisplayName(data.username || "");
+        setDisplayAvatar(data.avatarUrl || "");
+        setUsername(data.username || "");
+        setAvatarUrl(data.avatarUrl || "");
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:3001/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username, avatarUrl }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setDisplayName(data.user.username);
+        setDisplayAvatar(data.user.avatarUrl);
+        setUsername(data.user.username);
+        setAvatarUrl(data.user.avatarUrl);
+      } else {
+        alert(data.error || "Failed to update profile");
+      }
+    } catch (err) {
+      alert("Network error");
+    }
+    setShowEdit(false);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    fetch("http://localhost:3001/api/friends", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setFriends(data.friends || []);
+      })
+      .catch(() => {
+        setError("Failed to fetch friends.");
+        setFriends([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!showRequests) return;
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:3001/api/friends/requests`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setFriendRequests(Array.isArray(data.requests) ? data.requests : []);
+      })
+      .catch(() => {
+        setFriendRequests([]);
+      });
+  }, [showRequests, user]);
+
+  return (
+    <div className="profile">
+      <aside className="profile__sidebar" aria-labelledby="friends-heading">
+        <div className="profile__header">
+          {displayAvatar && (
+            <img
+              src={displayAvatar}
+              alt="Profile"
+              className="profile__avatar"
+            />
+          )}
+          <h1 id="friends-heading" className="profile__name">
+            {displayName || "Profile Name"}
+          </h1>
+        </div>
+        <button className="profile__edit-btn" onClick={() => setShowEdit(true)}>
+          Edit Profile
+        </button>
+        <button
+          className="profile__friends-btn"
+          disabled
+          style={{ marginBottom: 12 }}
+        >
+          Friends
+        </button>
+        <button
+          className="profile__friend-requests-btn"
+          style={{
+            width: "100%",
+            padding: "12px 0",
+            fontSize: "1rem",
+            borderRadius: 8,
+            border: "none",
+            background: "#2563eb",
+            color: "#fff",
+            cursor: "pointer",
+            marginBottom: 12,
+          }}
+          onClick={() => setShowRequests(true)}
+        >
+          Friend Requests
+        </button>
+        {/* Modal for friend requests */}
+        {showRequests && (
+          <div
+            className="profile__overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="friend-requests-title"
+          >
+            <div
+              className="profile__modal"
+              role="document"
+              style={{
+                maxWidth: "600px",
+                width: "90%",
+                minHeight: "600px",
+                padding: "48px 32px 32px 32px",
+                borderRadius: "18px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+                background: "#fff",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-start",
+              }}
+            >
+              <button
+                className="profile__modal-close"
+                aria-label="Close"
+                onClick={() => setShowRequests(false)}
+                style={{
+                  position: "absolute",
+                  top: 16,
+                  right: 24,
+                  fontSize: 32,
+                  background: "none",
+                  border: "none",
+                  color: "#888",
+                  cursor: "pointer",
+                }}
+              >
+                &times;
+              </button>
+              <h2
+                id="friend-requests-title"
+                style={{ marginBottom: 32, fontSize: 32, fontWeight: 700 }}
+              >
+                Friend Requests
+              </h2>
+              <div style={{ width: "100%", maxWidth: 480 }}>
+                {Array.isArray(friendRequests) &&
+                friendRequests.length === 0 ? (
+                  <div
+                    style={{
+                      color: "#888",
+                      fontSize: 18,
+                      textAlign: "center",
+                      marginTop: 32,
+                    }}
+                  >
+                    No friend requests.
+                  </div>
+                ) : (
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    {Array.isArray(friendRequests) &&
+                      friendRequests.map((req) => (
+                        <li
+                          key={req._id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "18px 0",
+                            borderBottom: "1px solid #eee",
+                          }}
+                        >
+                          <div
+                            style={{ display: "flex", alignItems: "center" }}
+                          >
+                            <img
+                              src={
+                                req.from.avatarUrl ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(req.from.username)}`
+                              }
+                              alt={req.from.username}
+                              style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 12,
+                                marginRight: 16,
+                              }}
+                            />
+                            <span style={{ fontSize: 20, fontWeight: 500 }}>
+                              {req.from.username}
+                            </span>
+                          </div>
+                          <div>
+                            <button
+                              style={{
+                                background: "#22c55e",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 6,
+                                padding: "8px 16px",
+                                marginRight: 8,
+                                cursor: "pointer",
+                              }}
+                              onClick={async () => {
+                                const token = localStorage.getItem("token");
+                                try {
+                                  const res = await fetch(
+                                    "http://localhost:3001/api/friends/accept",
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                      body: JSON.stringify({
+                                        requestId: req._id,
+                                      }),
+                                    }
+                                  );
+                                  const data = await res.json();
+                                  if (!res.ok) {
+                                    alert(
+                                      data.error || "Failed to accept request"
+                                    );
+                                    return;
+                                  }
+                                  // Remove request from UI
+                                  setFriendRequests((prev) =>
+                                    prev.filter((r) => r._id !== req._id)
+                                  );
+                                  // Refresh friends list
+                                  const friendsRes = await fetch(
+                                    "http://localhost:3001/api/friends",
+                                    {
+                                      method: "GET",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                    }
+                                  );
+                                  const friendsData = await friendsRes.json();
+                                  setFriends(friendsData.friends || []);
+                                } catch (err) {
+                                  alert("Network error");
+                                }
+                              }}
+                            >
+                              Accept
+                            </button>
+                            <button
+                              style={{
+                                background: "#ef4444",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: 6,
+                                padding: "8px 16px",
+                                cursor: "pointer",
+                              }}
+                              onClick={async () => {
+                                const token = localStorage.getItem("token");
+                                try {
+                                  const res = await fetch(
+                                    "http://localhost:3001/api/friends/reject",
+                                    {
+                                      method: "POST",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                      body: JSON.stringify({
+                                        requestId: req._id,
+                                      }),
+                                    }
+                                  );
+                                  const data = await res.json();
+                                  if (!res.ok) {
+                                    alert(
+                                      data.error || "Failed to reject request"
+                                    );
+                                    return;
+                                  }
+                                  // Remove request from UI
+                                  setFriendRequests((prev) =>
+                                    prev.filter((r) => r._id !== req._id)
+                                  );
+                                } catch (err) {
+                                  alert("Network error");
+                                }
+                              }}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        <button className="profile__signout-btn" onClick={handleSignOut}>
+          Sign Out
+        </button>
+        {/* Modal for editing profile */}
+        {showEdit && (
+          <div
+            className="profile__overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-title"
+          >
+            <div className="profile__modal" role="document">
+              <button
+                className="profile__modal-close"
+                aria-label="Close"
+                onClick={() => setShowEdit(false)}
+              >
+                &times;
+              </button>
+              <form onSubmit={handleEditSubmit} className="profile__form">
+                <h2 id="edit-profile-title" className="visually-hidden">
+                  Edit profile
+                </h2>
+                <label htmlFor="edit-username">Profile Name</label>
+                <input
+                  id="edit-username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+                <label htmlFor="edit-avatar">Profile Image URL</label>
+                <input
+                  id="edit-avatar"
+                  type="url"
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                  placeholder="Paste image URL"
+                />
+                <button type="submit" className="profile__save-btn">
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="profile__cancel-btn"
+                  onClick={() => setShowEdit(false)}
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </aside>
+      <main className="profile__main" aria-labelledby="friends-list-heading">
+        <h2 id="friends-list-heading" style={{ marginBottom: 24 }}>
+          Friends
+        </h2>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{ display: "flex", justifyContent: "center", width: "100%" }}
+          >
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleUserSearch();
+                }
+              }}
+              style={{
+                width: 320,
+                padding: "10px 16px",
+                fontSize: 18,
+                borderRadius: 8,
+                border: "1px solid #ccc",
+              }}
+            />
+            <button
+              onClick={handleUserSearch}
+              style={{
+                marginLeft: 12,
+                padding: "10px 20px",
+                fontSize: 18,
+                borderRadius: 8,
+                background: "#4f46e5",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              Search
+            </button>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+                setSearchError(null);
+              }}
+              style={{
+                marginLeft: 8,
+                padding: "10px 20px",
+                fontSize: 18,
+                borderRadius: 8,
+                background: "#e5e7eb",
+                color: "#333",
+                border: "1px solid #ccc",
+                cursor: "pointer",
+              }}
+            >
+              Clear
+            </button>
+          </div>
+          {/* Search results */}
+          {searchLoading && <div style={{ marginTop: 16 }}>Searching...</div>}
+          {searchError && (
+            <div style={{ marginTop: 16, color: "red" }}>{searchError}</div>
+          )}
+          {searchResults.length > 0 && (
+            <div style={{ marginTop: 16, width: "100%" }}>
+              <h3 style={{ fontWeight: 500, marginBottom: 8 }}>Results:</h3>
+              <section
+                className="profile__shows-grid"
+                aria-label="User search results"
+              >
+                {searchResults
+                  .filter((u) => u._id !== user?._id)
+                  .map((user) => {
+                    const isFriend = friends.some((f) => f._id === user._id);
+                    return (
+                      <article
+                        className="profile__card"
+                        aria-labelledby={`user-title-${user._id}`}
+                        key={user._id}
+                        style={{ position: "relative", paddingBottom: 48 }}
+                      >
+                        <img
+                          src={
+                            user.avatarUrl ||
+                            "https://ui-avatars.com/api/?name=" +
+                              encodeURIComponent(user.username)
+                          }
+                          alt={user.username}
+                          className="profile__image"
+                          loading="lazy"
+                        />
+                        <div
+                          className="profile__info"
+                          role="group"
+                          aria-label={`${user.username} info`}
+                        >
+                          <h3
+                            id={`user-title-${user._id}`}
+                            className="profile__show-title"
+                          >
+                            {user.username}
+                          </h3>
+                          <p className="profile__meta">
+                            Email: {user.email || "N/A"}
+                          </p>
+                        </div>
+                        {sentRequests.includes(user._id) && isFriend ? (
+                          <button
+                            style={{
+                              position: "absolute",
+                              left: "50%",
+                              bottom: 12,
+                              transform: "translateX(-50%)",
+                              width: 32,
+                              height: 32,
+                              borderRadius: 6,
+                              background: "#22c55e",
+                              border: "1px solid #16a34a",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "default",
+                              fontSize: 18,
+                              color: "#fff",
+                              boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                            }}
+                            title="Request Sent"
+                            disabled
+                          >
+                            <span
+                              style={{
+                                fontSize: 24,
+                                fontWeight: 900,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "100%",
+                                height: "100%",
+                              }}
+                            >
+                              &#10003;
+                            </span>
+                          </button>
+                        ) : (
+                          <button
+                            style={{
+                              position: "absolute",
+                              left: "50%",
+                              bottom: 12,
+                              transform: "translateX(-50%)",
+                              width: 32,
+                              height: 32,
+                              borderRadius: 6,
+                              background: "#22c55e",
+                              border: "1px solid #16a34a",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              cursor: "pointer",
+                              fontSize: 18,
+                              color: "#fff",
+                              boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                            }}
+                            title="Add Friend"
+                            onClick={async () => {
+                              const token = localStorage.getItem("token");
+                              const toUserId = user._id; // card user from searchResults
+                              if (!toUserId) {
+                                alert("Missing user ID");
+                                return;
+                              }
+                              try {
+                                const res = await fetch(
+                                  "http://localhost:3001/api/friends/request",
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      Authorization: `Bearer ${token}`,
+                                    },
+                                    body: JSON.stringify({ toUserId }),
+                                  }
+                                );
+                                const data = await res.json();
+                                if (!res.ok) {
+                                  alert(
+                                    data.error ||
+                                      "Failed to send friend request"
+                                  );
+                                  return;
+                                }
+                                setSentRequests((prev) => {
+                                  const updated = [...prev, user._id];
+                                  localStorage.setItem(
+                                    "sentFriendRequests",
+                                    JSON.stringify(updated)
+                                  );
+                                  return updated;
+                                });
+                              } catch (err) {
+                                alert("Failed to send friend request");
+                              }
+                            }}
+                          >
+                            +
+                          </button>
+                        )}
+                      </article>
+                    );
+                  })}
+              </section>
+            </div>
+          )}
+        </div>
+        {searchQuery.trim() === "" ? (
+          loading ? (
+            <p>Loading friends...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : friends.length === 0 && searchResults.length === 0 ? (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "60vh",
+                fontSize: 24,
+                color: "#888",
+              }}
+            >
+              No Friends to Show
+            </div>
+          ) : (
+            <section className="profile__shows-grid" aria-label="Friends list">
+              {friends.map((friend) => (
+                <article
+                  className="profile__card"
+                  aria-labelledby={`friend-title-${friend._id}`}
+                  key={friend._id}
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    (window.location.href = `/friend/${friend._id}`)
+                  }
+                >
+                  <img
+                    src={
+                      (friend && friend.avatarUrl) ||
+                      (user && user.avatarUrl) ||
+                      "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(friend?.username || "Friend")
+                    }
+                    alt={friend.username}
+                    className="profile__image"
+                    loading="lazy"
+                  />
+                  <div
+                    className="profile__info"
+                    role="group"
+                    aria-label={`${friend.username} info`}
+                  >
+                    <h3
+                      id={`friend-title-${friend._id}`}
+                      className="profile__show-title"
+                    >
+                      {friend.username}
+                    </h3>
+                    <p className="profile__meta">
+                      Email: {friend.email || "N/A"}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </section>
+          )
+        ) : null}
+      </main>
+      {/* Friend Media Modal */}
+      {showFriendMedia && activeFriend && (
+        <div className="profile__overlay" role="dialog" aria-modal="true">
+          <div
+            className="profile__modal"
+            role="document"
+            style={{
+              maxWidth: 700,
+              width: "95%",
+              minHeight: 400,
+              padding: 32,
+              borderRadius: 18,
+              background: "#fff",
+              position: "relative",
+            }}
+          >
+            <button
+              className="profile__modal-close"
+              aria-label="Close"
+              onClick={() => setShowFriendMedia(false)}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 24,
+                fontSize: 32,
+                background: "none",
+                border: "none",
+                color: "#888",
+                cursor: "pointer",
+              }}
+            >
+              &times;
+            </button>
+            <h2 style={{ marginBottom: 24, fontSize: 28, fontWeight: 700 }}>
+              {activeFriend.username}'s Media
+            </h2>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 22, fontWeight: 600 }}>Shows</h3>
+              {friendMedia.shows.length === 0 ? (
+                <div style={{ color: "#888", fontSize: 16 }}>
+                  No shows added.
+                </div>
+              ) : (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {friendMedia.shows.map((show) => (
+                    <li key={show._id} style={{ marginBottom: 12 }}>
+                      <strong>{show.name}</strong>{" "}
+                      {show.season ? `(Season ${show.season})` : ""}{" "}
+                      {show.episode ? `Ep ${show.episode}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div>
+              <h3 style={{ fontSize: 22, fontWeight: 600 }}>Movies</h3>
+              {friendMedia.movies.length === 0 ? (
+                <div style={{ color: "#888", fontSize: 16 }}>
+                  No movies added.
+                </div>
+              ) : (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {friendMedia.movies.map((movie) => (
+                    <li key={movie._id} style={{ marginBottom: 12 }}>
+                      <strong>{movie.name}</strong>{" "}
+                      {movie.release_date ? `(${movie.release_date})` : ""}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Friends;

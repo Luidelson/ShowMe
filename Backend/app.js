@@ -8,6 +8,7 @@ const User = require("./models/user");
 const showsApi = require("./routes/showsApi");
 const moviesApi = require("./routes/moviesApi");
 const allMoviesApi = require("./routes/allMoviesApi");
+const friendsApi = require("./routes/friends");
 const app = express();
 app.use(
   cors({
@@ -16,6 +17,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use("/api", friendsApi);
 
 mongoose.connect("mongodb://localhost:27017/finalproject");
 
@@ -113,9 +115,11 @@ app.put("/api/profile", async (req, res) => {
   }
 });
 
+const usersApi = require("./routes/users");
 app.use("/api", showsApi);
 app.use("/api", moviesApi);
 app.use("/api", allMoviesApi);
+app.use("/api", usersApi);
 
 const PORT = process.env.PORT || 3001;
 // GET /items returns an empty array

@@ -27,9 +27,24 @@
 
 /* Stack profile action buttons vertically */
 .profile__edit-btn,
-.profile__signout-btn {
+.profile__signout-btn,
+.profile__friends-btn {
   display: block;
   width: 100%;
+}
+
+.profile__friends-btn {
+  background: #4fc3f7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+.profile__signout-btn {
+  margin-top: 8px;
 }
 .profile__form {
   display: flex;

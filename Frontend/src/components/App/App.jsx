@@ -2,10 +2,13 @@ import "./App.css";
 import React, { useState } from "react";
 import Footer from "../Footer/Footer";
 import Navigation from "../Navigation/Navigation";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useParams } from "react-router-dom";
+// ...existing code...
+import FriendProfile from "../FriendProfile/FriendProfile";
 import About from "../About/About";
 import Content from "../Content/Content";
 import Profile from "../Profile/Profile";
+import Friends from "../Friends/Friends";
 import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
 import LoginModal from "../LoginModal/LoginModal";
 import RegisterModal from "../RegisterModal/RegisterModal";
@@ -110,10 +113,31 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/friends"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Friends user={user} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/friend/:id"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <FriendProfileWrapper />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       <Footer />
     </div>
   );
+}
+
+function FriendProfileWrapper() {
+  const { id } = useParams();
+  return <FriendProfile friendId={id} />;
 }
 
 export default App;

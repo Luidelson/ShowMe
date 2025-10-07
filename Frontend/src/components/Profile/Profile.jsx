@@ -122,21 +122,58 @@ function Profile({ user, onLogout }) {
   return (
     <div className="profile">
       <aside className="profile__sidebar" aria-labelledby="profile-heading">
-        <div className="profile__header">
-          {displayAvatar && (
+        <div
+          className="profile__header"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            justifyContent: "flex-start",
+          }}
+        >
+          {displayAvatar ? (
             <img
               src={displayAvatar}
               alt="Profile"
               className="profile__avatar"
+              style={{ width: 56, height: 56 }}
             />
+          ) : (
+            <div
+              className="profile__avatar profile__avatar--default"
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                background: "#90caf9",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#fff",
+              }}
+            >
+              {(displayName || "?").charAt(0).toUpperCase()}
+            </div>
           )}
-          <h1 id="profile-heading" className="profile__name">
+          <h1
+            id="profile-heading"
+            className="profile__name"
+            style={{ margin: 0, fontSize: 28 }}
+          >
             {displayName || "Profile Name"}
           </h1>
         </div>
         {/* Edit Profile button above Sign Out button */}
         <button className="profile__edit-btn" onClick={() => setShowEdit(true)}>
           Edit Profile
+        </button>
+        <button
+          className="profile__friends-btn"
+          onClick={() => (window.location.href = "/friends")}
+        >
+          Friends
         </button>
         <button className="profile__signout-btn" onClick={onLogout}>
           Sign Out
