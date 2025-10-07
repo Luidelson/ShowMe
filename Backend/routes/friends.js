@@ -6,6 +6,29 @@ const auth = require("../middlewares/auth");
 const Show = require("../models/show");
 const Movie = require("../models/movie");
 
+// Cancel (delete) a sent friend request
+router.post("/friends/cancel-request", auth, async (req, res) => {
+  const fromUserId = req.user.id;
+  const { toUserId } = req.body;
+  if (!fromUserId || !toUserId) {
+    return res.status(400).json({ error: "Missing user IDs" });
+  }
+  try {
+    const request = await FriendRequest.findOne({
+      from: fromUserId,
+      to: toUserId,
+      status: "pending",
+    });
+    if (!request) {
+      return res.status(404).json({ error: "No pending request found" });
+    }
+    await request.deleteOne();
+    return res.json({ message: "Friend request cancelled" });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to cancel request" });
+  }
+});
+
 // Remove a friend from the user's friends list
 router.delete("/friends/:friendId", auth, async (req, res) => {
   const userId = req.user.id;

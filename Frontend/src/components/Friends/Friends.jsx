@@ -19,7 +19,14 @@ function Friends({ user }) {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || "");
   const [displayName, setDisplayName] = useState(user?.username || "");
   const [displayAvatar, setDisplayAvatar] = useState(user?.avatarUrl || "");
-  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendRequests, setFriendRequests] = useState(() => {
+    try {
+      const stored = localStorage.getItem("friendRequestsCount");
+      return stored ? Array(Number(stored)).fill({}) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [sentRequests, setSentRequests] = useState(() => {
     try {
       const stored = localStorage.getItem("sentFriendRequests");
@@ -148,10 +155,13 @@ function Friends({ user }) {
     })
       .then((res) => res.json())
       .then((data) => {
-        setFriendRequests(Array.isArray(data.requests) ? data.requests : []);
+        const reqs = Array.isArray(data.requests) ? data.requests : [];
+        setFriendRequests(reqs);
+        localStorage.setItem("friendRequestsCount", reqs.length.toString());
       })
       .catch(() => {
         setFriendRequests([]);
+        localStorage.setItem("friendRequestsCount", "0");
       });
   }, [showRequests, user]);
 
@@ -192,10 +202,33 @@ function Friends({ user }) {
             color: "#fff",
             cursor: "pointer",
             marginBottom: 12,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
           onClick={() => setShowRequests(true)}
         >
           Friend Requests
+          {Array.isArray(friendRequests) && friendRequests.length > 0 && (
+            <span
+              style={{
+                background: "#e53935",
+                color: "#fff",
+                borderRadius: "8px",
+                padding: "2px 8px",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                marginLeft: 10,
+                minWidth: 24,
+                textAlign: "center",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                display: "inline-block",
+              }}
+            >
+              {friendRequests.length}
+            </span>
+          )}
         </button>
         {/* Modal for friend requests */}
         {showRequests && (
@@ -262,141 +295,143 @@ function Friends({ user }) {
                 ) : (
                   <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
                     {Array.isArray(friendRequests) &&
-                      friendRequests.map((req) => (
-                        <li
-                          key={req._id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            padding: "18px 0",
-                            borderBottom: "1px solid #eee",
-                          }}
-                        >
-                          <div
-                            style={{ display: "flex", alignItems: "center" }}
+                      friendRequests.map((req) => {
+                        const fromUser = req.from || {};
+                        const avatarUrl =
+                          fromUser.avatarUrl ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(fromUser.username || "User")}`;
+                        const username = fromUser.username || "Unknown";
+                        return (
+                          <li
+                            key={req._id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "18px 0",
+                              borderBottom: "1px solid #eee",
+                            }}
                           >
-                            <img
-                              src={
-                                req.from.avatarUrl ||
-                                `https://ui-avatars.com/api/?name=${encodeURIComponent(req.from.username)}`
-                              }
-                              alt={req.from.username}
-                              style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 12,
-                                marginRight: 16,
-                              }}
-                            />
-                            <span style={{ fontSize: 20, fontWeight: 500 }}>
-                              {req.from.username}
-                            </span>
-                          </div>
-                          <div>
-                            <button
-                              style={{
-                                background: "#22c55e",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: 6,
-                                padding: "8px 16px",
-                                marginRight: 8,
-                                cursor: "pointer",
-                              }}
-                              onClick={async () => {
-                                const token = localStorage.getItem("token");
-                                try {
-                                  const res = await fetch(
-                                    "http://localhost:3001/api/friends/accept",
-                                    {
-                                      method: "POST",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                        Authorization: `Bearer ${token}`,
-                                      },
-                                      body: JSON.stringify({
-                                        requestId: req._id,
-                                      }),
-                                    }
-                                  );
-                                  const data = await res.json();
-                                  if (!res.ok) {
-                                    alert(
-                                      data.error || "Failed to accept request"
-                                    );
-                                    return;
-                                  }
-                                  // Remove request from UI
-                                  setFriendRequests((prev) =>
-                                    prev.filter((r) => r._id !== req._id)
-                                  );
-                                  // Refresh friends list
-                                  const friendsRes = await fetch(
-                                    "http://localhost:3001/api/friends",
-                                    {
-                                      method: "GET",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                        Authorization: `Bearer ${token}`,
-                                      },
-                                    }
-                                  );
-                                  const friendsData = await friendsRes.json();
-                                  setFriends(friendsData.friends || []);
-                                } catch (err) {
-                                  alert("Network error");
-                                }
-                              }}
+                            <div
+                              style={{ display: "flex", alignItems: "center" }}
                             >
-                              Accept
-                            </button>
-                            <button
-                              style={{
-                                background: "#ef4444",
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: 6,
-                                padding: "8px 16px",
-                                cursor: "pointer",
-                              }}
-                              onClick={async () => {
-                                const token = localStorage.getItem("token");
-                                try {
-                                  const res = await fetch(
-                                    "http://localhost:3001/api/friends/reject",
-                                    {
-                                      method: "POST",
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                        Authorization: `Bearer ${token}`,
-                                      },
-                                      body: JSON.stringify({
-                                        requestId: req._id,
-                                      }),
-                                    }
-                                  );
-                                  const data = await res.json();
-                                  if (!res.ok) {
-                                    alert(
-                                      data.error || "Failed to reject request"
+                              <img
+                                src={avatarUrl}
+                                alt={username}
+                                style={{
+                                  width: 48,
+                                  height: 48,
+                                  borderRadius: 12,
+                                  marginRight: 16,
+                                }}
+                              />
+                              <span style={{ fontSize: 20, fontWeight: 500 }}>
+                                {username}
+                              </span>
+                            </div>
+                            <div>
+                              <button
+                                style={{
+                                  background: "#22c55e",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: 6,
+                                  padding: "8px 16px",
+                                  marginRight: 8,
+                                  cursor: "pointer",
+                                }}
+                                onClick={async () => {
+                                  const token = localStorage.getItem("token");
+                                  try {
+                                    const res = await fetch(
+                                      "http://localhost:3001/api/friends/accept",
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                        body: JSON.stringify({
+                                          requestId: req._id,
+                                        }),
+                                      }
                                     );
-                                    return;
+                                    const data = await res.json();
+                                    if (!res.ok) {
+                                      alert(
+                                        data.error || "Failed to accept request"
+                                      );
+                                      return;
+                                    }
+                                    setFriendRequests((prev) =>
+                                      prev.filter((r) => r._id !== req._id)
+                                    );
+                                    // Refresh friends list
+                                    const friendsRes = await fetch(
+                                      "http://localhost:3001/api/friends",
+                                      {
+                                        method: "GET",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                      }
+                                    );
+                                    const friendsData = await friendsRes.json();
+                                    setFriends(friendsData.friends || []);
+                                  } catch (err) {
+                                    alert("Network error");
                                   }
-                                  // Remove request from UI
-                                  setFriendRequests((prev) =>
-                                    prev.filter((r) => r._id !== req._id)
-                                  );
-                                } catch (err) {
-                                  alert("Network error");
-                                }
-                              }}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </li>
-                      ))}
+                                }}
+                              >
+                                Accept
+                              </button>
+                              <button
+                                style={{
+                                  background: "#ef4444",
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: 6,
+                                  padding: "8px 16px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={async () => {
+                                  const token = localStorage.getItem("token");
+                                  try {
+                                    const res = await fetch(
+                                      "http://localhost:3001/api/friends/reject",
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                        body: JSON.stringify({
+                                          requestId: req._id,
+                                        }),
+                                      }
+                                    );
+                                    const data = await res.json();
+                                    if (!res.ok) {
+                                      alert(
+                                        data.error || "Failed to reject request"
+                                      );
+                                      return;
+                                    }
+                                    setFriendRequests((prev) =>
+                                      prev.filter((r) => r._id !== req._id)
+                                    );
+                                  } catch (err) {
+                                    alert("Network error");
+                                  }
+                                }}
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </li>
+                        );
+                      })}
                   </ul>
                 )}
               </div>
@@ -422,10 +457,10 @@ function Friends({ user }) {
               >
                 &times;
               </button>
+              <h2 id="edit-profile-title" className="visually-hidden">
+                Edit profile
+              </h2>
               <form onSubmit={handleEditSubmit} className="profile__form">
-                <h2 id="edit-profile-title" className="visually-hidden">
-                  Edit profile
-                </h2>
                 <label htmlFor="edit-username">Profile Name</label>
                 <input
                   id="edit-username"
@@ -457,6 +492,7 @@ function Friends({ user }) {
           </div>
         )}
       </aside>
+      {/* ...existing code for edit modal and sidebar... */}
       <main className="profile__main" aria-labelledby="friends-list-heading">
         <h2 id="friends-list-heading" style={{ marginBottom: 24 }}>
           Friends
@@ -573,7 +609,7 @@ function Friends({ user }) {
                             Email: {user.email || "N/A"}
                           </p>
                         </div>
-                        {sentRequests.includes(user._id) && isFriend ? (
+                        {isFriend ? null : sentRequests.includes(user._id) ? (
                           <button
                             style={{
                               position: "absolute",
@@ -583,22 +619,86 @@ function Friends({ user }) {
                               width: 32,
                               height: 32,
                               borderRadius: 6,
-                              background: "#22c55e",
-                              border: "1px solid #16a34a",
+                              background: "#2563eb",
+                              border: "1px solid #2563eb",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              cursor: "default",
+                              cursor: "pointer",
                               fontSize: 18,
                               color: "#fff",
                               boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
                             }}
-                            title="Request Sent"
-                            disabled
+                            title="Cancel Friend Request"
+                            onClick={async () => {
+                              const token = localStorage.getItem("token");
+                              const toUserId = user._id;
+                              if (!toUserId) {
+                                alert("Missing user ID");
+                                return;
+                              }
+                              try {
+                                const res = await fetch(
+                                  "http://localhost:3001/api/friends/cancel-request",
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      Authorization: `Bearer ${token}`,
+                                    },
+                                    body: JSON.stringify({ toUserId }),
+                                  }
+                                );
+                                const data = await res.json();
+                                if (!res.ok) {
+                                  alert(
+                                    data.error ||
+                                      "Failed to cancel friend request"
+                                  );
+                                  return;
+                                }
+                                setSentRequests((prev) => {
+                                  const updated = prev.filter(
+                                    (id) => id !== user._id
+                                  );
+                                  localStorage.setItem(
+                                    "sentFriendRequests",
+                                    JSON.stringify(updated)
+                                  );
+                                  // Re-fetch friend requests to update UI
+                                  const token = localStorage.getItem("token");
+                                  fetch(
+                                    `http://localhost:3001/api/friends/requests`,
+                                    {
+                                      method: "GET",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                    }
+                                  )
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                      const reqs = Array.isArray(data.requests)
+                                        ? data.requests
+                                        : [];
+                                      setFriendRequests(reqs);
+                                      localStorage.setItem(
+                                        "friendRequestsCount",
+                                        reqs.length.toString()
+                                      );
+                                    })
+                                    .catch(() => {});
+                                  return updated;
+                                });
+                              } catch (err) {
+                                alert("Failed to cancel friend request");
+                              }
+                            }}
                           >
                             <span
                               style={{
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontWeight: 900,
                                 display: "flex",
                                 alignItems: "center",
@@ -607,7 +707,7 @@ function Friends({ user }) {
                                 height: "100%",
                               }}
                             >
-                              &#10003;
+                              &#8594;
                             </span>
                           </button>
                         ) : (

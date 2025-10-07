@@ -136,6 +136,24 @@ function FriendProfile({ friendId }) {
         >
           Delete Friend
         </button>
+        <button
+          className="profile__back-btn"
+          style={{
+            marginTop: 10,
+            padding: "8px 20px",
+            fontSize: 18,
+            fontWeight: 500,
+            borderRadius: 8,
+            background: "#e0e0e0",
+            color: "#333",
+            border: "none",
+            cursor: "pointer",
+            width: "100%",
+          }}
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </button>
         {showDeleteModal && (
           <div
             style={{

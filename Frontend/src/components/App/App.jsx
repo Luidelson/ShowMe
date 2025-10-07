@@ -13,6 +13,7 @@ import ProtectedRoute from "../ProtectedRoute/ProtectedRoute";
 import LoginModal from "../LoginModal/LoginModal";
 import RegisterModal from "../RegisterModal/RegisterModal";
 import Movies from "../Movies/Movies";
+import WhatsNew from "../WhatsNew/WhatsNew";
 
 function App() {
   const [showRegister, setShowRegister] = useState(false);
@@ -102,6 +103,7 @@ function App() {
             )
           }
         />
+        <Route path="/whatsnew" element={<WhatsNew />} />
         <Route path="/shows" element={<Content />} />
         <Route path="/about" element={<About />} />
         <Route path="/movies" element={<Movies />} />

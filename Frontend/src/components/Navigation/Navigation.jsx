@@ -1,7 +1,7 @@
-import './Navigation.css';
-import { Link } from 'react-router-dom';
-import logo from '../../assets/ShowMe.svg';
-import React, { useState } from 'react';
+import "./Navigation.css";
+import { Link } from "react-router-dom";
+import logo from "../../assets/ShowMe.svg";
+import React, { useState } from "react";
 
 function Navigation({ user }) {
   const [open, setOpen] = useState(false);
@@ -15,7 +15,7 @@ function Navigation({ user }) {
         <button
           type="button"
           className="navigation__toggle"
-          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="primary-navigation"
           onClick={() => setOpen((o) => !o)}
@@ -34,7 +34,7 @@ function Navigation({ user }) {
       </div>
       <ul
         id="primary-navigation"
-        className={`navigation__links ${open ? 'navigation__links--open' : ''}`}
+        className={`navigation__links ${open ? "navigation__links--open" : ""}`}
       >
         <li className="navigation__item">
           <Link
@@ -61,6 +61,15 @@ function Navigation({ user }) {
             onClick={handleLinkClick}
           >
             About
+          </Link>
+        </li>
+        <li className="navigation__item">
+          <Link
+            to="/whatsnew"
+            className="navigation__link"
+            onClick={handleLinkClick}
+          >
+            Whats New
           </Link>
         </li>
         {user && (
