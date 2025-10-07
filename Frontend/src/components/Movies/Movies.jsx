@@ -143,6 +143,7 @@ function Movies() {
             </option>
           ))}
         </select>
+        <div style={{ paddingBottom: 16 }} />
         {selectedGenre && selectedGenre !== "all" && (
           <button
             type="button"

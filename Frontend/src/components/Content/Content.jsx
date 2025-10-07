@@ -154,6 +154,7 @@ function Content() {
             )
           )}
         </select>
+        <div style={{ paddingBottom: 16 }} />
         {selectedGenre && (
           <button
             type="button"
