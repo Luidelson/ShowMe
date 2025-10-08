@@ -1,3 +1,15 @@
+.dark-mode .movies__modal {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .movies__card {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .movies__meta,
+.dark-mode .movies__title {
+  color: #fff !important;
+}
 .movies-fullscreen {
   width: 100vw;
   height: 100vh;

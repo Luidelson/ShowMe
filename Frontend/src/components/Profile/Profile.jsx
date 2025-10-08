@@ -65,7 +65,7 @@ function Profile({ user, onLogout }) {
         });
         const data = await response.json();
         if (response.ok) {
-          setDisplayName(data.username || "");
+          setDisplayName(data.username);
           setDisplayAvatar(data.avatarUrl || "");
           setUsername(data.username || "");
           setAvatarUrl(data.avatarUrl || "");
@@ -145,7 +145,7 @@ function Profile({ user, onLogout }) {
                 width: 56,
                 height: 56,
                 borderRadius: "50%",
-                background: "#90caf9",
+                background: "#888",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -154,7 +154,7 @@ function Profile({ user, onLogout }) {
                 color: "#fff",
               }}
             >
-              {(displayName || "?").charAt(0).toUpperCase()}
+              {displayName ? displayName.charAt(0).toUpperCase() : "U"}
             </div>
           )}
           <h1
@@ -162,7 +162,7 @@ function Profile({ user, onLogout }) {
             className="profile__name"
             style={{ margin: 0, fontSize: 28 }}
           >
-            {displayName || "Profile Name"}
+            {displayName ? displayName : "User"}
           </h1>
         </div>
         {/* Edit Profile button above Sign Out button */}
@@ -320,16 +320,16 @@ function Profile({ user, onLogout }) {
                     </p>
                     {show.status === "finished" && (
                       <p
-                        className="profile__meta"
-                        style={{ fontWeight: 600, color: "#388e3c" }}
+                        className="profile__meta finished"
+                        style={{ fontWeight: 600 }}
                       >
                         Finished
                       </p>
                     )}
                     {show.status === "watch_later" && (
                       <p
-                        className="profile__meta"
-                        style={{ fontWeight: 600, color: "#1976d2" }}
+                        className="profile__meta watch-later"
+                        style={{ fontWeight: 600 }}
                       >
                         Watch Later
                       </p>
@@ -394,16 +394,16 @@ function Profile({ user, onLogout }) {
                     </p>
                     {movie.status === "finished" && (
                       <p
-                        className="profile__meta"
-                        style={{ fontWeight: 600, color: "#388e3c" }}
+                        className="profile__meta finished"
+                        style={{ fontWeight: 600 }}
                       >
                         Finished
                       </p>
                     )}
                     {movie.status === "watch_later" && (
                       <p
-                        className="profile__meta"
-                        style={{ fontWeight: 600, color: "#1976d2" }}
+                        className="profile__meta watch-later"
+                        style={{ fontWeight: 600 }}
                       >
                         Watch Later
                       </p>

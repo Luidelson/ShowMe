@@ -1,6 +1,6 @@
 /* Global font rules (font-face kept only in public/Fonts/Fonts.css) */
 body {
-  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-weight: 400;
   font-style: normal;
 }

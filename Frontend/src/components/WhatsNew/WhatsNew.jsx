@@ -8,22 +8,43 @@ function WhatsNew() {
         <h1>What's New</h1>
         <ul>
           <li>
-            Friends section added: You can now add, search, and manage friends.
-            Your own account is filtered out from friends and search results.
+            <b>Dark Mode:</b> You can now enable dark mode for a more comfortable viewing experience at night or in low light.
           </li>
           <li>
-            Movies section added: Track, view, and manage your favorite movies.
+            <b>Friends:</b> You can now add, search for, and manage friends.
+            When searching, you won't see your own account or people you've
+            already added as friends.
           </li>
           <li>
-            Navigation bar updated: "What's New" link added for quick access to
-            updates.
+            <b>Movies:</b> Keep track of your favorite movies and manage your
+            movie list easily.
           </li>
           <li>
-            Bug fixes: Internal server errors and JSX rendering issues resolved
-            in Friends and Movies components.
+            <b>Easy Navigation:</b> The navigation bar now includes a "What's
+            New" link so you can quickly see the latest updates.
+          </li>
+          <li>
+            <b>Simple Usernames:</b> If you don't pick a name when signing up,
+            you'll automatically get a unique username like "User12345" that
+            stays the same everywhere.
+          </li>
+          <li>
+            <b>Profile Pictures:</b> If you don't upload a profile picture,
+            you'll see the first letter of your username on a gray background.
+          </li>
+          <li>
+            <b>Back Button:</b> There's now a back button under the Friend
+            Requests button to help you return to the previous page easily.
+          </li>
+          <li>
+            <b>Bug Fixes:</b> We've fixed errors and made the app run smoother,
+            especially in the Friends and Movies sections.
           </li>
         </ul>
-        <p>Enjoy the new features and improvements!</p>
+        <p style={{ marginTop: 16 }}>
+          We hope these updates make ShowMe easier and more fun to use! If you
+          have feedback or ideas, let us know.
+        </p>
       </div>
     </div>
   );

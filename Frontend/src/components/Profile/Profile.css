@@ -1,3 +1,62 @@
+.profile__meta.finished,
+.dark-mode .profile__meta.finished {
+  color: #388e3c !important;
+}
+.profile__meta.watch-later,
+.dark-mode .profile__meta.watch-later {
+  color: #1976d2 !important;
+}
+.dark-mode .profile__main > div {
+  background: #222 !important;
+  border-radius: 8px;
+}
+.dark-mode .profile__shows-list-container {
+  background: #222 !important;
+}
+.dark-mode .profile__shows-list-select,
+.dark-mode .profile__shows-list-select option,
+.dark-mode select,
+.dark-mode select option {
+  background: #222 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__myshows-heading,
+.dark-mode .profile__shows-list,
+.dark-mode .profile__shows-list * {
+  color: #fff !important;
+}
+.dark-mode .profile__main {
+  background: #000 !important;
+}
+.dark-mode .profile__header {
+  color: #fff !important;
+}
+.dark-mode .profile__modal {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__card {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__shows-card {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__shows-card {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__shows-grid {
+  background: #000 !important;
+  color: #fff !important;
+}
+.dark-mode .profile__shows-grid * {
+  color: #fff !important;
+}
+.dark-mode .profile__sidebar {
+  background-color: #444 !important;
+}
 /* BEM version of Profile styles */
 .profile {
   display: flex;

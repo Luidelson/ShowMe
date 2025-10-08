@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import Footer from "../Footer/Footer";
 import Navigation from "../Navigation/Navigation";
 import { Routes, Route, useParams } from "react-router-dom";
-// ...existing code...
 import FriendProfile from "../FriendProfile/FriendProfile";
 import About from "../About/About";
 import Content from "../Content/Content";
@@ -27,6 +26,10 @@ function App() {
       localStorage.setItem("token", data.token);
       setIsAuthenticated(true);
       setUser(data.user);
+      if (data.user && (data.user.id || data.user._id)) {
+        localStorage.setItem("userId", data.user.id || data.user._id);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
     }
   };
 
@@ -36,6 +39,10 @@ function App() {
       setIsAuthenticated(true);
       setUser(data.user);
       setShowRegister(false);
+      if (data.user && (data.user.id || data.user._id)) {
+        localStorage.setItem("userId", data.user.id || data.user._id);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
     }
   };
 

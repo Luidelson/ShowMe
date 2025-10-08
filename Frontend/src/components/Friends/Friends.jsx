@@ -168,16 +168,47 @@ function Friends({ user }) {
   return (
     <div className="profile">
       <aside className="profile__sidebar" aria-labelledby="friends-heading">
-        <div className="profile__header">
-          {displayAvatar && (
+        <div
+          className="profile__header"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            justifyContent: "flex-start",
+          }}
+        >
+          {displayAvatar ? (
             <img
               src={displayAvatar}
               alt="Profile"
               className="profile__avatar"
+              style={{ width: 56, height: 56 }}
             />
+          ) : (
+            <div
+              className="profile__avatar profile__avatar--default"
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                background: "#888",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#fff",
+              }}
+            >
+              {displayName ? displayName.charAt(0).toUpperCase() : "U"}
+            </div>
           )}
-          <h1 id="friends-heading" className="profile__name">
-            {displayName || "Profile Name"}
+          <h1
+            id="friends-heading"
+            className="profile__name"
+            style={{ margin: 0, fontSize: 28 }}
+          >
+            {displayName ? displayName : "User"}
           </h1>
         </div>
         <button className="profile__edit-btn" onClick={() => setShowEdit(true)}>
@@ -229,6 +260,27 @@ function Friends({ user }) {
               {friendRequests.length}
             </span>
           )}
+        </button>
+        <button
+          className="profile__back-btn"
+          style={{
+            width: "100%",
+            padding: "12px 0",
+            fontSize: "1rem",
+            borderRadius: 8,
+            border: "none",
+            background: "#e5e7eb",
+            color: "#333",
+            cursor: "pointer",
+            marginBottom: 12,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => window.history.back()}
+        >
+          Back
         </button>
         {/* Modal for friend requests */}
         {showRequests && (
@@ -566,7 +618,7 @@ function Friends({ user }) {
           {searchError && (
             <div style={{ marginTop: 16, color: "red" }}>{searchError}</div>
           )}
-          {searchResults.length > 0 && (
+          {searchQuery.trim() && searchResults.length > 0 && (
             <div style={{ marginTop: 16, width: "100%" }}>
               <h3 style={{ fontWeight: 500, marginBottom: 8 }}>Results:</h3>
               <section
@@ -603,11 +655,9 @@ function Friends({ user }) {
                             id={`user-title-${user._id}`}
                             className="profile__show-title"
                           >
-                            {user.username}
+                            {user.username ? user.username : "User"}
                           </h3>
-                          <p className="profile__meta">
-                            Email: {user.email || "N/A"}
-                          </p>
+                          {/* Email removed for privacy */}
                         </div>
                         {isFriend ? null : sentRequests.includes(user._id) ? (
                           <button
@@ -833,9 +883,7 @@ function Friends({ user }) {
                     >
                       {friend.username}
                     </h3>
-                    <p className="profile__meta">
-                      Email: {friend.email || "N/A"}
-                    </p>
+                    {/* Email removed for privacy */}
                   </div>
                 </article>
               ))}

@@ -1,3 +1,15 @@
+.dark-mode .whatsnew-content {
+  background: #000 !important;
+  color: #fff !important;
+}
+.dark-mode .whatsnew-container ul,
+.dark-mode .whatsnew-container li,
+.dark-mode .whatsnew-container p {
+  color: #fff !important;
+}
+.dark-mode .whatsnew-container h1 {
+  color: #4f46e5 !important;
+}
 .whatsnew-container {
   width: 100vw;
   height: 100vh;

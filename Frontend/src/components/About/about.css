@@ -1,3 +1,11 @@
+.dark-mode .about {
+  background: #000 !important;
+}
+.dark-mode .about__main,
+.dark-mode .about-nav,
+.dark-mode .about__heading {
+  color: #fff !important;
+}
 .about {
   min-height: 100vh;
   background: lightgray;
@@ -13,7 +21,7 @@
 }
 
 .about-logo {
-  font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Poppins", system-ui, Avenir, Helvetica, Arial, sans-serif;
   font-size: 1.2rem;
   color: #d77f7b;
   letter-spacing: 1px;

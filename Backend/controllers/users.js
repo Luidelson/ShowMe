@@ -4,8 +4,16 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   try {
     const { email, password, confirmPassword, username, avatarUrl } = req.body;
-    if (!email || !password || !confirmPassword || !username) {
-      return res.status(400).json({ message: "All fields are required." });
+    if (!email || !password || !confirmPassword) {
+      return res.status(400).json({
+        message: "Email, password, and confirm password are required.",
+      });
+    }
+    let finalUsername = username;
+    if (!finalUsername || !finalUsername.trim()) {
+      // Generate default username: 'user' + 5 random digits
+      const randomDigits = Math.floor(10000 + Math.random() * 90000);
+      finalUsername = `user${randomDigits}`;
     }
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match." });
@@ -14,7 +22,12 @@ exports.register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: "Email already in use" });
     }
-    const user = new User({ email, password, username, avatarUrl });
+    const user = new User({
+      email,
+      password,
+      username: finalUsername,
+      avatarUrl,
+    });
     await user.save();
     // Auto-login after registration
     const token = jwt.sign(

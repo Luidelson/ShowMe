@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Profile/Profile.css";
+import MessageModal from "./MessageModal";
 
 function FriendProfile({ friendId }) {
   const [friend, setFriend] = useState(null);
@@ -11,6 +12,9 @@ function FriendProfile({ friendId }) {
   const [selectedList, setSelectedList] = useState("shows");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +62,94 @@ function FriendProfile({ friendId }) {
     fetchMedia();
   }, [friendId]);
 
+  // Fetch messages when modal opens
+  useEffect(() => {
+    if (!showMessageModal || !friend?._id) return;
+    const token = localStorage.getItem("token");
+    let userId = localStorage.getItem("userId");
+    if (!userId && localStorage.getItem("user")) {
+      try {
+        userId = JSON.parse(localStorage.getItem("user")).id;
+      } catch {}
+    }
+    fetch(`http://localhost:3001/api/messages/${friend._id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const mappedMsgs = (data.messages || []).map((msg) => ({
+          ...msg,
+          fromMe: String(msg.from) === String(userId),
+        }));
+        setMessages(mappedMsgs);
+        // Persist messages for this friend in localStorage
+        localStorage.setItem(
+          `messages_${friend._id}`,
+          JSON.stringify(data.messages || [])
+        );
+        // Mark all as read when modal opens
+        localStorage.setItem(
+          `messages_read_${friend._id}`,
+          JSON.stringify(Date.now())
+        );
+        setUnreadCount(0);
+      });
+  }, [showMessageModal, friend]);
+
+  // Load cached messages and unread count on mount (for instant display)
+  useEffect(() => {
+    if (friend?._id) {
+      let userId = localStorage.getItem("userId");
+      if (!userId && localStorage.getItem("user")) {
+        try {
+          userId = JSON.parse(localStorage.getItem("user")).id;
+        } catch {}
+      }
+      const cached = localStorage.getItem(`messages_${friend._id}`);
+      if (cached) {
+        const msgs = JSON.parse(cached);
+        setMessages(
+          msgs.map((msg) => ({
+            ...msg,
+            fromMe: String(msg.from) === String(userId),
+          }))
+        );
+        // Calculate unread count
+        const lastRead = Number(
+          localStorage.getItem(`messages_read_${friend._id}`) || 0
+        );
+        const unread = msgs.filter((msg) => {
+          // Only count messages sent to the user and after last read
+          return (
+            String(msg.from) !== String(userId) &&
+            msg.createdAt &&
+            new Date(msg.createdAt).getTime() > lastRead
+          );
+        }).length;
+        setUnreadCount(unread);
+      }
+    }
+  }, [friend?._id]);
+
+  function handleSendMessage(text) {
+    fetch("http://localhost:3001/api/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ to: friend._id, text }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setMessages((prev) => [...prev, { ...data.message, fromMe: true }]);
+        }
+      });
+  }
+
   if (loading) return <div className="profile">Loading...</div>;
   if (error) return <div className="profile">{error}</div>;
   if (!friend) return <div className="profile">Friend not found.</div>;
@@ -80,7 +172,7 @@ function FriendProfile({ friendId }) {
                 width: 56,
                 height: 56,
                 borderRadius: "50%",
-                background: "#90caf9",
+                background: "#888",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -113,10 +205,35 @@ function FriendProfile({ friendId }) {
             border: "none",
             cursor: "pointer",
             width: "100%",
+            position: "relative",
           }}
-          onClick={() => alert(`Messaging ${friend.username}`)}
+          onClick={() => setShowMessageModal(true)}
         >
           Message
+          {unreadCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: 2,
+                right: 12,
+                minWidth: 18,
+                height: 18,
+                background: "#ef4444",
+                color: "#fff",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                fontWeight: 700,
+                padding: "0 6px",
+                zIndex: 2,
+                boxShadow: "0 0 2px #333",
+              }}
+            >
+              {unreadCount}
+            </span>
+          )}
         </button>
         <button
           className="profile__delete-friend-btn"
@@ -246,6 +363,15 @@ function FriendProfile({ friendId }) {
               </div>
             </div>
           </div>
+        )}
+        {showMessageModal && (
+          <MessageModal
+            open={showMessageModal}
+            onClose={() => setShowMessageModal(false)}
+            friend={friend}
+            messages={messages}
+            onSend={handleSendMessage}
+          />
         )}
       </aside>
       <main className="profile__main" aria-labelledby="shows-heading">

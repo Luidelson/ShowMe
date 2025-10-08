@@ -9,6 +9,7 @@ const showsApi = require("./routes/showsApi");
 const moviesApi = require("./routes/moviesApi");
 const allMoviesApi = require("./routes/allMoviesApi");
 const friendsApi = require("./routes/friends");
+const messagesApi = require("./routes/messages");
 const app = express();
 app.use(
   cors({
@@ -18,6 +19,7 @@ app.use(
 );
 app.use(express.json());
 app.use("/api", friendsApi);
+app.use("/api/messages", messagesApi);
 
 mongoose.connect("mongodb://localhost:27017/finalproject");
 
@@ -67,7 +69,7 @@ app.post("/api/login", async (req, res) => {
       JWT_SECRET,
       { expiresIn: "1d" }
     );
-    res.json({ token });
+    res.json({ token, user: { email: user.email, id: user._id } });
   } catch (err) {
     res.status(500).json({ error: "Login failed." });
   }

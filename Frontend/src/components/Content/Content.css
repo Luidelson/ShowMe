@@ -1,3 +1,49 @@
+.dark-mode .content__search {
+  color: #000 !important;
+  font-weight: bold;
+  caret-color: #1976d2;
+}
+.dark-mode .content__search {
+  color: #000 !important;
+}
+.dark-mode .content__modal {
+  background: #181818 !important;
+  color: #fff !important;
+}
+.dark-mode .content__genre-dropdown {
+  background: #222 !important;
+  color: #222 !important;
+  border: 1px solid #444 !important;
+}
+.dark-mode .content__genre-dropdown option {
+  background: #222 !important;
+  color: #222 !important;
+}
+.dark-mode .content__genre-dropdown option[value="all"] {
+  color: #222 !important;
+}
+.dark-mode .content button,
+.dark-mode .content__genre-clear-btn {
+  color: #222 !important;
+}
+.dark-mode .content__genre-dropdown option {
+  color: #222 !important;
+}
+.dark-mode .content__genre-dropdown,
+.dark-mode .content__genre-dropdown * {
+  color: #222 !important;
+}
+.dark-mode .content,
+.dark-mode .content * {
+  color: #fff !important;
+}
+.dark-mode .content {
+  background: #000 !important;
+}
+.dark-mode .content__card {
+  background: #181818 !important;
+  color: #fff !important;
+}
 /* Genre dropdown styles */
 .content__genre-dropdown {
   padding: 8px 16px;

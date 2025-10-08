@@ -2,9 +2,22 @@ import "./Navigation.css";
 import { Link } from "react-router-dom";
 import logo from "../../assets/ShowMe.svg";
 import React, { useState } from "react";
+import ThemeToggle from "../ThemeToggle";
 
 function Navigation({ user }) {
   const [open, setOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
+
+  React.useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
 
   // Close menu on route click
   const handleLinkClick = () => setOpen(false);
@@ -36,11 +49,16 @@ function Navigation({ user }) {
         id="primary-navigation"
         className={`navigation__links ${open ? "navigation__links--open" : ""}`}
       >
-        <li className="navigation__item">
+        <li
+          className="navigation__item"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
           <Link
             to="/movies"
             className="navigation__link"
             onClick={handleLinkClick}
+            style={{ marginLeft: 8 }}
           >
             Movies
           </Link>
