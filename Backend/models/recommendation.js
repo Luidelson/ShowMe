@@ -5,6 +5,8 @@ const RecommendationSchema = new mongoose.Schema({
   to: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   showId: { type: String },
   showName: { type: String },
+  movieId: { type: String },
+  movieName: { type: String },
   image: Object,
   note: String,
   read: { type: Boolean, default: false },

@@ -10,7 +10,8 @@
 .dark-mode .movies__title {
   color: #fff !important;
 }
-.movies-fullscreen {
+
+.dark-mode .movies .movies-fullscreen {
   width: 100vw;
   height: 100vh;
   min-height: 100vh;

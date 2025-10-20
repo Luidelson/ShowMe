@@ -77,11 +77,27 @@ function RecommendedModal({ onClose, onHandled }) {
     );
   };
 
+  // Prevent duplicate/accidental calls
+  const [acceptingId, setAcceptingId] = useState(null);
   const acceptRecommendation = async (rec) => {
+    if (acceptingId === rec._id) return; // Already processing
+    setAcceptingId(rec._id);
     const token = localStorage.getItem("token");
     try {
-      // If we have a showId, attempt to save it to user's shows as a convenience
-      if (rec?.showId) {
+      if (rec?.movieId) {
+        await fetch("http://localhost:3001/api/save-movie", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            movieId: rec.movieId,
+            name: rec.movieName,
+            image: rec.image || {},
+          }),
+        });
+      } else if (rec?.showId) {
         await fetch("http://localhost:3001/api/save-show", {
           method: "POST",
           headers: {
@@ -108,6 +124,7 @@ function RecommendedModal({ onClose, onHandled }) {
       });
     } catch (e) {}
     setRecommendations((prev) => prev.filter((r) => r._id !== rec._id));
+    setAcceptingId(null);
     if (typeof onHandled === "function") onHandled(1);
   };
 
@@ -186,7 +203,14 @@ function RecommendedModal({ onClose, onHandled }) {
           </div>
         ) : (
           <ul
-            style={{ listStyle: "none", padding: 0, margin: 0, width: "100%" }}
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              width: "100%",
+              maxHeight: 350,
+              overflowY: "auto",
+            }}
           >
             {recommendations.map((rec) => (
               <li
@@ -247,7 +271,7 @@ function RecommendedModal({ onClose, onHandled }) {
                   {rec.image?.medium ? (
                     <img
                       src={rec.image.medium}
-                      alt={rec.showName}
+                      alt={rec.showName || rec.movieName}
                       style={{
                         width: 40,
                         height: 60,
@@ -273,7 +297,9 @@ function RecommendedModal({ onClose, onHandled }) {
                       ?
                     </span>
                   )}
-                  <span style={{ fontWeight: 500 }}>{rec.showName}</span>
+                  <span style={{ fontWeight: 500 }}>
+                    {rec.showName || rec.movieName}
+                  </span>
                 </div>
                 {rec.note && (
                   <div
@@ -307,6 +333,7 @@ function RecommendedModal({ onClose, onHandled }) {
                           fontSize: 13,
                         }}
                         onClick={() => acceptRecommendation(rec)}
+                        disabled={acceptingId === rec._id}
                       >
                         Accept
                       </button>
@@ -782,7 +809,15 @@ function Friends({ user }) {
                     No friend requests.
                   </div>
                 ) : (
-                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  <ul
+                    style={{
+                      listStyle: "none",
+                      padding: 0,
+                      margin: 0,
+                      maxHeight: 350,
+                      overflowY: "auto",
+                    }}
+                  >
                     {Array.isArray(friendRequests) &&
                       friendRequests.map((req) => {
                         const fromUser = req.from || {};

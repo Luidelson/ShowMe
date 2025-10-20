@@ -13,8 +13,6 @@ function WhatsNew() {
           </li>
           <li>
             <b>Friends:</b> You can now add, search for, and manage friends.
-            When searching, you won't see your own account or people you've
-            already added as friends.
           </li>
           <li>
             <b>Movies:</b> Keep track of your favorite movies and manage your

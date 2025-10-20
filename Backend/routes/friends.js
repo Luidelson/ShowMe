@@ -160,10 +160,13 @@ router.get("/friends", auth, async (req, res) => {
 router.post("/friends/:friendId/recommend", auth, async (req, res) => {
   const fromUserId = req.user.id;
   const { friendId } = req.params;
-  const { showId, showName, image, note } = req.body;
-  if (!fromUserId || !friendId || !showId) {
+  const { showId, showName, movieId, movieName, image, note } = req.body;
+
+  // Must have either show or movie data
+  if (!fromUserId || !friendId || (!showId && !movieId)) {
     return res.status(400).json({ error: "Missing parameters" });
   }
+
   try {
     // Optionally verify friendId is actually a friend; allow recommending anyway for MVP
     const rec = new Recommendation({
@@ -171,6 +174,8 @@ router.post("/friends/:friendId/recommend", auth, async (req, res) => {
       to: friendId,
       showId,
       showName,
+      movieId,
+      movieName,
       image,
       note,
     });

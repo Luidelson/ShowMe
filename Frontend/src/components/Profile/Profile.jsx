@@ -777,8 +777,15 @@ function Profile({ user, onLogout }) {
                                     Authorization: `Bearer ${token}`,
                                   },
                                   body: JSON.stringify({
-                                    showId: editShowModal.showId,
-                                    showName: editShowModal.name,
+                                    ...(editShowModal.isMovie
+                                      ? {
+                                          movieId: editShowModal.movieId,
+                                          movieName: editShowModal.name,
+                                        }
+                                      : {
+                                          showId: editShowModal.showId,
+                                          showName: editShowModal.name,
+                                        }),
                                     image: editShowModal.image || {},
                                     note: recommendNote,
                                   }),
