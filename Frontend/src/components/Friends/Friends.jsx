@@ -1,6 +1,341 @@
 import React, { useEffect, useState } from "react";
 import "../Profile/Profile.css";
 
+// Modal to show incoming recommendations for the logged-in user
+function RecommendedModal({ onClose, onHandled }) {
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const isDark =
+    typeof document !== "undefined" &&
+    document.body.classList.contains("dark-mode");
+
+  // Close on Escape while modal is open
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You must be logged in to view recommendations.");
+      setLoading(false);
+      return;
+    }
+    fetch("http://localhost:3001/api/recommendations/incoming", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const all = Array.isArray(data.recommendations)
+          ? data.recommendations
+          : [];
+        const unread = all.filter((r) => !r.read);
+        const readOnes = all.filter((r) => r.read);
+        setRecommendations(unread);
+        // Optional cleanup: remove old read recommendations from server
+        if (readOnes.length > 0) {
+          Promise.all(
+            readOnes.map((r) =>
+              fetch(`http://localhost:3001/api/recommendations/${r._id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              }).catch(() => null)
+            )
+          ).catch(() => null);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to fetch recommendations.");
+        setLoading(false);
+      });
+  }, []);
+
+  const markRead = async (id) => {
+    const token = localStorage.getItem("token");
+    await fetch(`http://localhost:3001/api/recommendations/${id}/read`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setRecommendations((prev) =>
+      prev.map((r) => (r._id === id ? { ...r, read: true } : r))
+    );
+  };
+
+  const acceptRecommendation = async (rec) => {
+    const token = localStorage.getItem("token");
+    try {
+      // If we have a showId, attempt to save it to user's shows as a convenience
+      if (rec?.showId) {
+        await fetch("http://localhost:3001/api/save-show", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            showId: rec.showId,
+            name: rec.showName,
+            image: rec.image || {},
+          }),
+        });
+      }
+    } catch (e) {
+      // Non-fatal: proceed to remove recommendation anyway
+    }
+    try {
+      await fetch(`http://localhost:3001/api/recommendations/${rec._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (e) {}
+    setRecommendations((prev) => prev.filter((r) => r._id !== rec._id));
+    if (typeof onHandled === "function") onHandled(1);
+  };
+
+  const ignoreRecommendation = async (id) => {
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`http://localhost:3001/api/recommendations/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (e) {}
+    setRecommendations((prev) => prev.filter((r) => r._id !== id));
+    if (typeof onHandled === "function") onHandled(1);
+  };
+
+  return (
+    <div
+      className="profile__overlay"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="profile__modal"
+        role="document"
+        style={{
+          maxWidth: "600px",
+          width: "90%",
+          minHeight: "400px",
+          padding: "48px 32px 32px 32px",
+          borderRadius: "18px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          background: "#fff",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="profile__modal-close"
+          aria-label="Close"
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 24,
+            fontSize: 32,
+            background: "none",
+            border: "none",
+            color: "#888",
+            cursor: "pointer",
+          }}
+        >
+          &times;
+        </button>
+        <h2 style={{ marginBottom: 24, fontSize: 28, fontWeight: 700 }}>
+          Incoming Recommendations
+        </h2>
+        {loading ? (
+          <div style={{ color: "#555", fontSize: 18, marginTop: 32 }}>
+            Loading...
+          </div>
+        ) : error ? (
+          <div style={{ color: "#e53935", fontSize: 18, marginTop: 32 }}>
+            {error}
+          </div>
+        ) : recommendations.length === 0 ? (
+          <div style={{ color: "#666", fontSize: 18, marginTop: 32 }}>
+            No recommendations yet.
+          </div>
+        ) : (
+          <ul
+            style={{ listStyle: "none", padding: 0, margin: 0, width: "100%" }}
+          >
+            {recommendations.map((rec) => (
+              <li
+                key={rec._id}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  background: isDark
+                    ? rec.read
+                      ? "#2b2b2b"
+                      : "#333333"
+                    : rec.read
+                      ? "#f3f4f6"
+                      : "#eef2ff",
+                  color: isDark ? "#f3f4f3" : "inherit",
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  padding: 16,
+                  boxShadow: "0 1px 8px #0001",
+                  opacity: rec.read ? 0.7 : 1,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {rec.from?.avatarUrl ? (
+                    <img
+                      src={rec.from.avatarUrl}
+                      alt="avatar"
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: "#ddd",
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        background: "#bbb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "bold",
+                        color: "#fff",
+                      }}
+                    >
+                      {rec.from?.username?.charAt(0).toUpperCase() || "?"}
+                    </span>
+                  )}
+                  <span style={{ fontWeight: 600 }}>
+                    {rec.from?.username || "Unknown"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {rec.image?.medium ? (
+                    <img
+                      src={rec.image.medium}
+                      alt={rec.showName}
+                      style={{
+                        width: 40,
+                        height: 60,
+                        objectFit: "cover",
+                        borderRadius: 4,
+                        background: isDark ? "#444" : "#eee",
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 40,
+                        height: 60,
+                        borderRadius: 4,
+                        background: isDark ? "#444" : "#e5e7eb",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: isDark ? "#ddd" : "#6b7280",
+                        fontSize: 24,
+                      }}
+                    >
+                      ?
+                    </span>
+                  )}
+                  <span style={{ fontWeight: 500 }}>{rec.showName}</span>
+                </div>
+                {rec.note && (
+                  <div
+                    style={{
+                      fontStyle: "italic",
+                      color: isDark ? "#ffffff" : "#4b5563",
+                    }}
+                  >
+                    {rec.note}
+                  </div>
+                )}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 16,
+                    fontSize: "0.95em",
+                  }}
+                >
+                  <span>{new Date(rec.createdAt).toLocaleString()}</span>
+                  {!rec.read && (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        style={{
+                          background: "#22c55e",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: 4,
+                          padding: "4px 10px",
+                          cursor: "pointer",
+                          fontSize: 13,
+                        }}
+                        onClick={() => acceptRecommendation(rec)}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        style={{
+                          background: "#9ca3af",
+                          color: "#111827",
+                          border: "none",
+                          borderRadius: 4,
+                          padding: "4px 10px",
+                          cursor: "pointer",
+                          fontSize: 13,
+                        }}
+                        onClick={() => ignoreRecommendation(rec._id)}
+                      >
+                        Ignore
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Friends({ user }) {
   const [showFriendMedia, setShowFriendMedia] = useState(false);
   const [friendMedia, setFriendMedia] = useState({ shows: [], movies: [] });
@@ -35,6 +370,62 @@ function Friends({ user }) {
       return [];
     }
   });
+
+  // Show recommendations modal
+  const [showRecommended, setShowRecommended] = useState(false);
+  const [recommendedCount, setRecommendedCount] = useState(0);
+
+  // Fetch count of unread recommendations
+  const updateRecommendedCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setRecommendedCount(0);
+        return;
+      }
+      const res = await fetch(
+        "http://localhost:3001/api/recommendations/incoming",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      const all = Array.isArray(data.recommendations)
+        ? data.recommendations
+        : [];
+      const unread = all.filter((r) => !r.read);
+      setRecommendedCount(unread.length);
+    } catch (e) {
+      // ignore errors
+    }
+  };
+
+  useEffect(() => {
+    updateRecommendedCount();
+  }, []);
+
+  // When modal closes, refresh count (it may have changed)
+  useEffect(() => {
+    if (!showRecommended) updateRecommendedCount();
+  }, [showRecommended]);
+
+  // Global Escape: close any open Friends modals
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        if (showRequests) setShowRequests(false);
+        if (showEdit) setShowEdit(false);
+        if (showRecommended) setShowRecommended(false);
+        if (showFriendMedia) setShowFriendMedia(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showRequests, showEdit, showRecommended, showFriendMedia]);
 
   useEffect(() => {
     try {
@@ -262,6 +653,50 @@ function Friends({ user }) {
           )}
         </button>
         <button
+          className="profile__recommended-btn"
+          style={{
+            width: "100%",
+            padding: "12px 0",
+            fontSize: "1rem",
+            borderRadius: 8,
+            border: "none",
+            background: "#6a1b9a",
+            color: "#fff",
+            cursor: "pointer",
+            marginBottom: 12,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => setShowRecommended(true)}
+        >
+          <span>Recommended</span>
+          {recommendedCount > 0 && (
+            <span
+              aria-label={`${recommendedCount} recommendations`}
+              style={{
+                position: "absolute",
+                top: 12,
+                right: 10,
+                minWidth: 22,
+                height: 22,
+                padding: "0 6px",
+                borderRadius: 999,
+                background: "#ef4444",
+                color: "#fff",
+                fontSize: 12,
+                lineHeight: "22px",
+                textAlign: "center",
+                fontWeight: 700,
+                boxShadow: "0 0 0 2px rgba(0,0,0,0.1)",
+              }}
+            >
+              {recommendedCount > 99 ? "99+" : recommendedCount}
+            </span>
+          )}
+        </button>
+        <button
           className="profile__back-btn"
           style={{
             width: "100%",
@@ -289,6 +724,7 @@ function Friends({ user }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="friend-requests-title"
+            onClick={() => setShowRequests(false)}
           >
             <div
               className="profile__modal"
@@ -307,6 +743,7 @@ function Friends({ user }) {
                 alignItems: "center",
                 justifyContent: "flex-start",
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <button
                 className="profile__modal-close"
@@ -490,6 +927,15 @@ function Friends({ user }) {
             </div>
           </div>
         )}
+        {/* Recommended modal */}
+        {showRecommended && (
+          <RecommendedModal
+            onClose={() => setShowRecommended(false)}
+            onHandled={(n = 1) =>
+              setRecommendedCount((c) => Math.max(0, c - (Number(n) || 1)))
+            }
+          />
+        )}
         <button className="profile__signout-btn" onClick={handleSignOut}>
           Sign Out
         </button>
@@ -500,8 +946,13 @@ function Friends({ user }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="edit-profile-title"
+            onClick={() => setShowEdit(false)}
           >
-            <div className="profile__modal" role="document">
+            <div
+              className="profile__modal"
+              role="document"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 className="profile__modal-close"
                 aria-label="Close"
@@ -620,7 +1071,12 @@ function Friends({ user }) {
           )}
           {searchQuery.trim() && searchResults.length > 0 && (
             <div style={{ marginTop: 16, width: "100%" }}>
-              <h3 style={{ fontWeight: 500, marginBottom: 8 }}>Results:</h3>
+              <h3
+                className="friends__results-heading"
+                style={{ fontWeight: 500, marginBottom: 8 }}
+              >
+                Results:
+              </h3>
               <section
                 className="profile__shows-grid"
                 aria-label="User search results"
@@ -893,7 +1349,12 @@ function Friends({ user }) {
       </main>
       {/* Friend Media Modal */}
       {showFriendMedia && activeFriend && (
-        <div className="profile__overlay" role="dialog" aria-modal="true">
+        <div
+          className="profile__overlay"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowFriendMedia(false)}
+        >
           <div
             className="profile__modal"
             role="document"
@@ -906,6 +1367,7 @@ function Friends({ user }) {
               background: "#fff",
               position: "relative",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               className="profile__modal-close"

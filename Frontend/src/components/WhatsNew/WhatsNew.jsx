@@ -8,7 +8,8 @@ function WhatsNew() {
         <h1>What's New</h1>
         <ul>
           <li>
-            <b>Dark Mode:</b> You can now enable dark mode for a more comfortable viewing experience at night or in low light.
+            <b>Dark Mode:</b> You can now enable dark mode for a more
+            comfortable viewing experience at night or in low light.
           </li>
           <li>
             <b>Friends:</b> You can now add, search for, and manage friends.

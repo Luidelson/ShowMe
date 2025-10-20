@@ -5,6 +5,12 @@ function Profile({ user, onLogout }) {
   // Dropdown state for toggling between shows and movies
   const [selectedList, setSelectedList] = useState("shows");
   const [editShowModal, setEditShowModal] = useState(null);
+  const [friendsList, setFriendsList] = useState([]);
+  const [recommendOpen, setRecommendOpen] = useState(false);
+  const [recommendNote, setRecommendNote] = useState("");
+  const [selectedFriend, setSelectedFriend] = useState("");
+  const [recommendSending, setRecommendSending] = useState(false);
+  const [recommendSent, setRecommendSent] = useState(false);
   const [editSeason, setEditSeason] = useState("");
   const [editEpisode, setEditEpisode] = useState("");
 
@@ -75,6 +81,20 @@ function Profile({ user, onLogout }) {
       }
     };
     fetchProfile();
+    // fetch friends for recommend dropdown
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:3001/api/friends", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((r) => r.json())
+        .then((d) => setFriendsList(d.friends || []))
+        .catch(() => setFriendsList([]));
+    }
   }, []);
 
   const handleEditSubmit = async (e) => {
@@ -682,6 +702,121 @@ function Profile({ user, onLogout }) {
                   >
                     Watch Later
                   </button>
+                </div>
+                {/* Recommend UI */}
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="profile__save-btn"
+                    style={{ background: "#6a1b9a", color: "#fff" }}
+                    onClick={() => {
+                      setRecommendOpen((s) => !s);
+                      setRecommendSent(false);
+                      setRecommendSending(false);
+                    }}
+                  >
+                    Recommend
+                  </button>
+                  {recommendOpen && (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 8,
+                      }}
+                    >
+                      <select
+                        value={selectedFriend}
+                        onChange={(e) => setSelectedFriend(e.target.value)}
+                      >
+                        <option value="">Select a friend</option>
+                        {friendsList.map((f) => (
+                          <option key={f._id} value={f._id}>
+                            {f.username}
+                          </option>
+                        ))}
+                      </select>
+                      <textarea
+                        placeholder="Add a short note (optional)"
+                        value={recommendNote}
+                        onChange={(e) => setRecommendNote(e.target.value)}
+                        rows={3}
+                      />
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          type="button"
+                          className="profile__save-btn"
+                          disabled={recommendSending || recommendSent}
+                          style={{
+                            opacity: recommendSending ? 0.8 : 1,
+                            cursor:
+                              recommendSending || recommendSent
+                                ? "not-allowed"
+                                : "pointer",
+                            background: recommendSent ? "#22c55e" : undefined,
+                          }}
+                          onClick={async () => {
+                            if (!selectedFriend)
+                              return alert("Choose a friend");
+                            const token = localStorage.getItem("token");
+                            try {
+                              setRecommendSending(true);
+                              const res = await fetch(
+                                `http://localhost:3001/api/friends/${selectedFriend}/recommend`,
+                                {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    Authorization: `Bearer ${token}`,
+                                  },
+                                  body: JSON.stringify({
+                                    showId: editShowModal.showId,
+                                    showName: editShowModal.name,
+                                    image: editShowModal.image || {},
+                                    note: recommendNote,
+                                  }),
+                                }
+                              );
+                              if (!res.ok) {
+                                const err = await res.json();
+                                alert(err.error || "Failed to recommend");
+                                setRecommendSending(false);
+                                return;
+                              }
+                              // Success: change button label to "Sent" and disable
+                              setRecommendSent(true);
+                              setRecommendSending(false);
+                              setRecommendNote("");
+                              // keep dropdown open so user sees "Sent"
+                            } catch (err) {
+                              setRecommendSending(false);
+                              alert(
+                                "Network error while sending recommendation"
+                              );
+                            }
+                          }}
+                        >
+                          {recommendSending
+                            ? "Sending..."
+                            : recommendSent
+                              ? "Sent"
+                              : "Send"}
+                        </button>
+                        <button
+                          type="button"
+                          className="profile__cancel-btn"
+                          onClick={() => {
+                            setRecommendOpen(false);
+                            setRecommendNote("");
+                            setSelectedFriend("");
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <button

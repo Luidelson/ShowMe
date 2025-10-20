@@ -31,6 +31,11 @@
 .dark-mode .profile__header {
   color: #fff !important;
 }
+.dark-mode .profile__main h1,
+.dark-mode .profile__main h2,
+.dark-mode .profile__name {
+  color: #fff !important;
+}
 .dark-mode .profile__modal {
   background: #181818 !important;
   color: #fff !important;
@@ -322,4 +327,9 @@ input[type="number"] {
   text-align: left;
   font-size: 1rem;
   color: #222;
+}
+
+/* Friends results heading color in dark mode */
+.dark-mode .friends__results-heading {
+  color: #ffffff !important;
 }

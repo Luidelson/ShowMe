@@ -5,6 +5,7 @@ const User = require("../models/user");
 const auth = require("../middlewares/auth");
 const Show = require("../models/show");
 const Movie = require("../models/movie");
+const Recommendation = require("../models/recommendation");
 
 // Cancel (delete) a sent friend request
 router.post("/friends/cancel-request", auth, async (req, res) => {
@@ -152,6 +153,74 @@ router.get("/friends", auth, async (req, res) => {
     res.json({ friends: user.friends || [] });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch friends list" });
+  }
+});
+
+// Recommend a show/movie to a friend
+router.post("/friends/:friendId/recommend", auth, async (req, res) => {
+  const fromUserId = req.user.id;
+  const { friendId } = req.params;
+  const { showId, showName, image, note } = req.body;
+  if (!fromUserId || !friendId || !showId) {
+    return res.status(400).json({ error: "Missing parameters" });
+  }
+  try {
+    // Optionally verify friendId is actually a friend; allow recommending anyway for MVP
+    const rec = new Recommendation({
+      from: fromUserId,
+      to: friendId,
+      showId,
+      showName,
+      image,
+      note,
+    });
+    await rec.save();
+    res.json({ success: true, recommendation: rec });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create recommendation" });
+  }
+});
+
+// Get incoming recommendations for logged in user
+router.get("/recommendations/incoming", auth, async (req, res) => {
+  try {
+    const recs = await Recommendation.find({ to: req.user.id })
+      .populate("from", "username avatarUrl _id")
+      .sort({ createdAt: -1 });
+    res.json({ recommendations: recs });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch recommendations" });
+  }
+});
+
+// Mark a recommendation as read
+router.post("/recommendations/:id/read", auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const rec = await Recommendation.findById(id);
+    if (!rec) return res.status(404).json({ error: "Not found" });
+    if (rec.to.toString() !== req.user.id)
+      return res.status(403).json({ error: "Not authorized" });
+    rec.read = true;
+    await rec.save();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to mark as read" });
+  }
+});
+
+// Delete a recommendation (ignore)
+router.delete("/recommendations/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const rec = await Recommendation.findById(id);
+    if (!rec) return res.status(404).json({ error: "Not found" });
+    if (rec.to.toString() !== req.user.id)
+      return res.status(403).json({ error: "Not authorized" });
+    await rec.deleteOne();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete recommendation" });
   }
 });
 
