@@ -97,6 +97,12 @@ function Profile({ user, onLogout }) {
     }
   }, []);
 
+  // Reset recommend button state when switching to a different show/movie
+  React.useEffect(() => {
+    setRecommendSent(false);
+    setRecommendSending(false);
+  }, [editShowModal]);
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -810,6 +816,8 @@ function Profile({ user, onLogout }) {
                             setRecommendOpen(false);
                             setRecommendNote("");
                             setSelectedFriend("");
+                            setRecommendSent(false);
+                            setRecommendSending(false);
                           }}
                         >
                           Cancel
