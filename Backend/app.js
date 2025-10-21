@@ -13,7 +13,11 @@ const messagesApi = require("./routes/messages");
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://www.showme.jumpingcrab.com"],
+    origin: [
+      "http://localhost:3000",
+      "https://www.showme.jumpingcrab.com",
+      "https://35.238.98.146",
+    ],
     credentials: true,
   })
 );
