@@ -8,7 +8,7 @@ function Header() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    fetch("http://localhost:3001/api/profile", {
+    fetch(`${BASE_URL}/api/profile`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
